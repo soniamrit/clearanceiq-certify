@@ -486,7 +486,10 @@ const STRIPE = {
 // ── ANTHROPIC BACKEND ────────────────────────────────
 // Set ANTHROPIC_API_KEY in Netlify → Site settings → Environment variables
 // Then deploy netlify/functions/redteam.js (file created separately)
-const AI_ENDPOINT = '/.netlify/functions/redteam'; // backend proxy URL // reuse leads form — replace with dedicated form ID
+// Works on both Netlify (/.netlify/functions/redteam) and Vercel (/api/redteam)
+const AI_ENDPOINT = window.location.hostname.includes('netlify') 
+  ? '/.netlify/functions/redteam' 
+  : '/api/redteam'; // backend proxy URL // reuse leads form — replace with dedicated form ID
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 // NOTE FOR AKRATI: Add your Anthropic API key here or load from environment
 // For production, this call should be proxied through a backend to protect the API key
