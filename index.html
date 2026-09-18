@@ -635,12 +635,12 @@ function renderDomainControls(di) {
         <button class="status-btn ${resp.status==='not-applicable'?'sel-na':''}"
           onclick="setStatus('${ctrl.id}','not-applicable',${di})" style="background:${resp.status==='not-applicable'?'#64748B':'transparent'};color:${resp.status==='not-applicable'?'white':'#64748B'};border-color:#64748B;">N/A</button>
       </div>
-      ${resp.status==='not-applicable' ? \`
+      ${resp.status==='not-applicable' ? `
       <span class="ctrl-label" style="color:#64748B;">Justification for N/A designation <span style="color:#DC2626;">*</span></span>
       <textarea class="ctrl-input" style="border-color:#94A3B8;" id="na-${ctrl.id.replace(/\./g,'_')}"
         placeholder="Explain why this control does not apply (e.g. No mobile devices in scope, no wireless networks, no external connections...)"
         oninput="setResp('${ctrl.id}','na_justification',this.value)">${resp.na_justification||''}</textarea>
-      \` : ''}
+      ` : ''}
       <span class="ctrl-label">Implementation Description</span>
       <textarea class="ctrl-input" id="desc-${ctrl.id.replace(/\./g,'_')}"
         placeholder="Describe how this control is implemented in your environment..."
@@ -827,8 +827,8 @@ function showSSP() {
         const chipText = s==='implemented'?'Implemented':s==='partial'?'Partial':s==='not-implemented'?'Not Implemented':s==='not-applicable'?'N/A — Justified':'Not Reviewed';
         const sprsPoints = getControlWeight(ctrl.id, s);
         const pointsDisplay = s==='implemented'||s==='not-applicable' ? '<span style="color:#4ADE80;font-size:10px;">+0 pts</span>' :
-          s==='partial' ? \`<span style="color:#FCD34D;font-size:10px;">-\${getControlWeight(ctrl.id,'partial')} pts</span>\` :
-          sprsPoints > 0 ? \`<span style="color:#F87171;font-size:10px;">-\${sprsPoints} pts</span>\` : '';
+          s==='partial' ? `<span style="color:#FCD34D;font-size:10px;">-${getControlWeight(ctrl.id,'partial')} pts</span>` :
+          sprsPoints > 0 ? `<span style="color:#F87171;font-size:10px;">-${sprsPoints} pts</span>` : '';
         const rtRisk = resp.rtResult?.risk;
         return `<div class="ssp-control-row">
           <div class="ssp-control-id">${ctrl.id}</div>
