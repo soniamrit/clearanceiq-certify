@@ -58,6 +58,7 @@ nav{background:var(--navy);padding:0 24px;height:60px;display:flex;align-items:c
 .control-card.implemented{border-left:4px solid var(--green);}
 .control-card.partial{border-left:4px solid var(--amber);}
 .control-card.not-implemented{border-left:4px solid var(--red);}
+.control-card.not-applicable{border-left:4px solid var(--slate);opacity:.75;}
 .control-id{font-size:11px;font-weight:700;color:var(--slate);letter-spacing:.5px;margin-bottom:4px;}
 .control-req{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:14px;line-height:1.45;}
 .status-row{display:flex;gap:8px;margin-bottom:12px;}
@@ -323,7 +324,8 @@ footer p{font-size:11px;color:#283848;}
     </div>
     <div class="btn-row">
       <button class="btn-back" onclick="goToDomain(DOMAINS.length-1)">← Edit Controls</button>
-      <button class="btn-primary" onclick="submitCertify()">Submit for Expert Review →</button>
+      <button class="btn-primary" onclick="submitCertify()" style="margin-right:10px;">Submit for Expert Review →</button>
+      <button class="btn-back" onclick="generateSubmissionPackage()" style="background:linear-gradient(135deg,#059669,#047857);color:white;border:none;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">⬇ Generate SPRS Submission Package</button>
     </div>
   </div>
 
@@ -613,7 +615,8 @@ function renderDomainControls(di) {
     const resp = getResp(ctrl.id);
     const statusClass = resp.status === 'implemented' ? 'implemented' :
                         resp.status === 'partial' ? 'partial' :
-                        resp.status === 'not-implemented' ? 'not-implemented' : '';
+                        resp.status === 'not-implemented' ? 'not-implemented' :
+                        resp.status === 'not-applicable' ? 'not-applicable' : '';
 
     const card = document.createElement('div');
     card.className = `control-card ${statusClass}`;
@@ -629,7 +632,15 @@ function renderDomainControls(di) {
           onclick="setStatus('${ctrl.id}','partial',${di})">⚡ Partial</button>
         <button class="status-btn ${resp.status==='not-implemented'?'sel-none':''}"
           onclick="setStatus('${ctrl.id}','not-implemented',${di})">✗ Not Implemented</button>
+        <button class="status-btn ${resp.status==='not-applicable'?'sel-na':''}"
+          onclick="setStatus('${ctrl.id}','not-applicable',${di})" style="background:${resp.status==='not-applicable'?'#64748B':'transparent'};color:${resp.status==='not-applicable'?'white':'#64748B'};border-color:#64748B;">N/A</button>
       </div>
+      ${resp.status==='not-applicable' ? \`
+      <span class="ctrl-label" style="color:#64748B;">Justification for N/A designation <span style="color:#DC2626;">*</span></span>
+      <textarea class="ctrl-input" style="border-color:#94A3B8;" id="na-${ctrl.id.replace(/\./g,'_')}"
+        placeholder="Explain why this control does not apply (e.g. No mobile devices in scope, no wireless networks, no external connections...)"
+        oninput="setResp('${ctrl.id}','na_justification',this.value)">${resp.na_justification||''}</textarea>
+      \` : ''}
       <span class="ctrl-label">Implementation Description</span>
       <textarea class="ctrl-input" id="desc-${ctrl.id.replace(/\./g,'_')}"
         placeholder="Describe how this control is implemented in your environment..."
@@ -777,20 +788,33 @@ function showSSP() {
   document.getElementById('ssp-meta').textContent =
     `${state.company.name} · Prepared by: ${state.company.contact} · ${state.company.date}`;
 
-  let impl=0, part=0, none=0, nr=0;
+  let impl=0, part=0, none=0, nr=0, na=0;
   const allControls = DOMAINS.flatMap(d=>d.controls);
   allControls.forEach(c => {
     const s = state.responses[c.id]?.status;
     if(s==='implemented') impl++;
     else if(s==='partial') part++;
     else if(s==='not-implemented') none++;
+    else if(s==='not-applicable') na++;
     else nr++;
   });
 
   document.getElementById('sn-impl').textContent = impl;
   document.getElementById('sn-part').textContent = part;
   document.getElementById('sn-none').textContent = none;
-  document.getElementById('sn-nr').textContent = nr;
+  document.getElementById('sn-nr').textContent = nr + (na > 0 ? ` (+${na} N/A)` : '');
+
+  // Update SPRS score display using accurate DoD methodology
+  const sprsResult = calculateSPRSAccurate();
+  const sprsEl = document.getElementById('ssp-sprs-score');
+  if (sprsEl) {
+    sprsEl.textContent = sprsResult.score + '/110';
+    sprsEl.style.color = sprsResult.score >= 88 ? '#4ADE80' : sprsResult.score >= 0 ? '#FCD34D' : '#F87171';
+  }
+  if (sprsResult.ssp_missing) {
+    const warn = document.getElementById('ssp-gate-warning');
+    if (warn) warn.style.display = 'block';
+  }
 
   const body = document.getElementById('ssp-body');
   body.innerHTML = DOMAINS.map(domain => `
@@ -799,8 +823,12 @@ function showSSP() {
       ${domain.controls.map(ctrl => {
         const resp = state.responses[ctrl.id] || {};
         const s = resp.status || 'not-reviewed';
-        const chipClass = s==='implemented'?'chip-impl':s==='partial'?'chip-part':s==='not-implemented'?'chip-none':'chip-nr';
-        const chipText = s==='implemented'?'Implemented':s==='partial'?'Partial':s==='not-implemented'?'Not Implemented':'Not Reviewed';
+        const chipClass = s==='implemented'?'chip-impl':s==='partial'?'chip-part':s==='not-implemented'?'chip-none':s==='not-applicable'?'chip-nr':'chip-nr';
+        const chipText = s==='implemented'?'Implemented':s==='partial'?'Partial':s==='not-implemented'?'Not Implemented':s==='not-applicable'?'N/A — Justified':'Not Reviewed';
+        const sprsPoints = getControlWeight(ctrl.id, s);
+        const pointsDisplay = s==='implemented'||s==='not-applicable' ? '<span style="color:#4ADE80;font-size:10px;">+0 pts</span>' :
+          s==='partial' ? \`<span style="color:#FCD34D;font-size:10px;">-\${getControlWeight(ctrl.id,'partial')} pts</span>\` :
+          sprsPoints > 0 ? \`<span style="color:#F87171;font-size:10px;">-\${sprsPoints} pts</span>\` : '';
         const rtRisk = resp.rtResult?.risk;
         return `<div class="ssp-control-row">
           <div class="ssp-control-id">${ctrl.id}</div>
@@ -1092,6 +1120,303 @@ function buildPOAMDoc() {
     + 'POA&amp;M Generated by ClearanceIQ&trade; &middot; ' + today + '</div>';
 
   document.getElementById('doc-content').innerHTML = html;
+}
+
+
+// ── OFFICIAL DOD SPRS SCORING TABLE ─────────────────────────────
+// Source: NIST SP 800-171 DoD Assessment Methodology v1.2.1
+// Per 32 CFR 170.24 and FutureFeed/Defense Compliance Report verified data
+// 5 = high impact, 3 = medium, 1 = limited, 0 = SSP gate (no deduction)
+// 'partial' = special rule: 5 or 3 depending on implementation level
+
+const SPRS_WEIGHTS = {
+  // ── 5-POINT BASIC REQUIREMENTS ──────────────────────────────────
+  '3.1.1':5,'3.1.2':5,'3.2.1':5,'3.2.2':5,'3.3.1':5,'3.4.1':5,
+  '3.4.2':5,'3.5.1':5,'3.5.2':5,'3.6.1':5,'3.6.2':5,'3.7.2':5,
+  '3.8.3':5,'3.9.2':5,'3.10.1':5,'3.10.2':5,'3.12.1':5,'3.12.3':5,
+  '3.13.1':5,'3.13.2':5,'3.14.1':5,'3.14.2':5,'3.14.3':5,
+  // ── 5-POINT DERIVED REQUIREMENTS ────────────────────────────────
+  '3.1.12':5,'3.1.13':5,'3.1.16':5,'3.1.17':5,'3.1.18':5,
+  '3.3.5':5,'3.4.5':5,'3.4.6':5,'3.4.7':5,'3.4.8':5,
+  '3.5.10':5,'3.7.5':5,'3.8.7':5,'3.11.2':5,
+  '3.13.5':5,'3.13.6':5,'3.13.15':5,'3.14.4':5,'3.14.6':5,
+  // ── PARTIAL CREDIT CONTROLS (5 if none, 3 if partial) ───────────
+  '3.5.3':'partial_mfa',    // MFA: -5 if no MFA anywhere, -3 if partial
+  '3.13.11':'partial_fips', // FIPS encryption: -5 if none, -3 if non-FIPS
+  // ── SSP GATE (no point value — required prerequisite) ───────────
+  '3.12.4':0,
+  // ── 3-POINT BASIC REQUIREMENTS ──────────────────────────────────
+  '3.3.2':3,'3.7.1':3,'3.8.1':3,'3.8.2':3,'3.9.1':3,'3.11.1':3,'3.12.2':3,
+  // ── 3-POINT DERIVED REQUIREMENTS ────────────────────────────────
+  '3.1.5':3,'3.1.19':3,'3.7.4':3,'3.8.8':3,'3.13.8':3,'3.14.5':3,'3.14.7':3,
+  // All remaining controls = 1 point (default — not listed here)
+};
+
+function getControlWeight(ctrlId, status) {
+  const weight = SPRS_WEIGHTS[ctrlId];
+  if (weight === 0) return 0; // SSP gate
+  if (weight === 'partial_mfa') {
+    if (status === 'implemented') return 0;
+    if (status === 'partial') return 3; // has MFA for some, not all
+    return 5; // no MFA at all
+  }
+  if (weight === 'partial_fips') {
+    if (status === 'implemented') return 0;
+    if (status === 'partial') return 3; // encrypts but not FIPS-validated
+    return 5; // no encryption at all
+  }
+  return weight !== undefined ? weight : 1; // default = 1 point
+}
+
+function calculateSPRSAccurate() {
+  // Get all controls from DOMAINS and QUESTIONS_FLAT
+  const allControls = [];
+  if (typeof DOMAINS !== 'undefined') {
+    DOMAINS.forEach(d => d.controls.forEach(c => allControls.push(c.id)));
+  } else if (typeof QUESTIONS_FLAT !== 'undefined') {
+    QUESTIONS_FLAT.forEach(c => allControls.push(c.id));
+  }
+
+  let score = 110;
+  let ssp_missing = false;
+
+  allControls.forEach(ctrlId => {
+    const resp = getResp(ctrlId) || {};
+    const status = resp.status || 'not-reviewed';
+
+    // N/A and implemented = no deduction
+    if (status === 'implemented' || status === 'not-applicable') return;
+
+    // SSP gate check
+    if (ctrlId === '3.12.4') {
+      if (status !== 'implemented' && status !== 'not-applicable') ssp_missing = true;
+      return;
+    }
+
+    // Deduct points
+    const deduction = getControlWeight(ctrlId, status);
+    score -= deduction;
+  });
+
+  return { score: Math.max(-203, score), ssp_missing };
+}
+
+// ── SUBMISSION PACKAGE GENERATOR ─────────────────────────────────
+function generateSubmissionPackage() {
+  const result = calculateSPRSAccurate();
+  const c = state.company;
+  const today = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const dateCode = new Date().toISOString().split('T')[0];
+
+  // Build complete package as printable HTML
+  const pkgWindow = window.open('', '_blank');
+  if (!pkgWindow) { alert('Please allow popups to generate the submission package.'); return; }
+
+  const sprsScore = result.score;
+  const sprsColor = sprsScore >= 88 ? '#059669' : sprsScore >= 0 ? '#D97706' : '#DC2626';
+  const status = sprsScore >= 110 ? 'FINAL (110/110)' : sprsScore >= 88 ? 'CONDITIONAL (≥88)' : 'GAPS IDENTIFIED — POA&M REQUIRED';
+
+  // Count controls
+  const allControls = typeof DOMAINS !== 'undefined' ?
+    DOMAINS.flatMap(d => d.controls.map(c => c.id)) :
+    (typeof QUESTIONS_FLAT !== 'undefined' ? QUESTIONS_FLAT.map(c => c.id) : []);
+
+  const impl = allControls.filter(id => getResp(id).status === 'implemented').length;
+  const part = allControls.filter(id => getResp(id).status === 'partial').length;
+  const none = allControls.filter(id => !getResp(id).status || getResp(id).status === 'not-implemented').length;
+  const na = allControls.filter(id => getResp(id).status === 'not-applicable').length;
+
+  // POA&M items
+  const gaps = allControls.filter(id => {
+    const s = getResp(id).status;
+    return !s || s === 'not-implemented' || s === 'partial';
+  });
+
+  pkgWindow.document.write(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"/>
+<title>CMMC Level 2 SPRS Submission Package — ${c.name||'[Organization]'} — ${dateCode}</title>
+<style>
+body{font-family:Arial,sans-serif;font-size:12px;color:#0D1B2A;margin:32px;line-height:1.5;}
+h1{font-size:20px;font-weight:bold;margin-bottom:4px;}
+h2{font-size:14px;font-weight:bold;margin:24px 0 8px;border-bottom:2px solid #0099CC;padding-bottom:4px;color:#0099CC;}
+h3{font-size:12px;font-weight:bold;margin:16px 0 4px;}
+table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+th{background:#070F1E;color:white;padding:6px 10px;font-size:11px;text-align:left;}
+td{padding:6px 10px;border-bottom:1px solid #E2E8F0;font-size:11px;vertical-align:top;}
+.score{font-size:48px;font-weight:bold;color:${sprsColor};}
+.warn{background:#FEF2F2;border:2px solid #DC2626;border-radius:6px;padding:12px;margin:12px 0;}
+.page-break{page-break-before:always;}
+.sig-line{border-bottom:2px solid #CBD5E0;height:40px;margin-bottom:4px;}
+@media print{.no-print{display:none;}}
+</style></head><body>
+
+<div class="no-print" style="background:#0099CC;color:white;padding:12px;border-radius:6px;margin-bottom:20px;">
+<strong>CMMC Level 2 SPRS Submission Package</strong> — Click File → Print → Save as PDF to download all documents.
+<button onclick="window.print()" style="float:right;background:white;color:#0099CC;border:none;padding:6px 16px;border-radius:4px;font-weight:bold;cursor:pointer;">⬇ Save as PDF</button>
+</div>
+
+<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #070F1E;">
+<div style="font-size:10px;font-weight:bold;color:#0099CC;letter-spacing:2px;margin-bottom:4px;">CONTROLLED UNCLASSIFIED INFORMATION</div>
+<h1>CMMC Level 2 SPRS Submission Package</h1>
+<div style="font-size:14px;color:#64748B;">${c.name||'[Organization Name]'} · ${today}</div>
+<div style="font-size:11px;color:#94A3B8;margin-top:4px;">CAGE Code: ${c.cage||'[CAGE]'} · EIN: ${c.ein||'[EIN]'} · Generated by ClearanceIQ™</div>
+</div>
+
+<!-- DOCUMENT 1: SPRS SCORE WORKSHEET -->
+<h2>Document 1 of 4 — SPRS Score Worksheet</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+<div>
+<table><tr><th colspan="2">Organization Information</th></tr>
+<tr><td><strong>Organization</strong></td><td>${c.name||'[Name]'}</td></tr>
+<tr><td><strong>CAGE Code</strong></td><td>${c.cage||'[CAGE Code]'}</td></tr>
+<tr><td><strong>Affirming Official</strong></td><td>${c.contact||'[Name]'}, ${c.role||'[Title]'}</td></tr>
+<tr><td><strong>Assessment Date</strong></td><td>${today}</td></tr>
+<tr><td><strong>SSP Name/Version</strong></td><td>${c.name||'[Org]'} SSP v1.0 — ${dateCode}</td></tr>
+<tr><td><strong>Scoring Standard</strong></td><td>NIST SP 800-171 Rev 2</td></tr>
+<tr><td><strong>Assessment Type</strong></td><td>Basic (Self-Assessment) — Low Confidence</td></tr>
+</table>
+</div>
+<div style="text-align:center;padding:20px;border:2px solid ${sprsColor};border-radius:8px;">
+<div style="font-size:11px;font-weight:bold;color:#64748B;text-transform:uppercase;">SPRS Score</div>
+<div class="score">${sprsScore}</div>
+<div style="font-size:11px;color:#64748B;">Range: -203 to +110</div>
+<div style="margin-top:8px;font-size:12px;font-weight:bold;color:${sprsColor};">${status}</div>
+</div>
+</div>
+
+<table><tr><th>Status</th><th>Count</th><th>SPRS Treatment</th></tr>
+<tr><td>✓ Implemented</td><td>${impl}</td><td>No deduction</td></tr>
+<tr><td>⚡ Partial</td><td>${part}</td><td>Full or partial deduction per DoD methodology</td></tr>
+<tr><td>✗ Not Implemented</td><td>${none}</td><td>Full point deduction applied</td></tr>
+<tr><td>N/A (Justified)</td><td>${na}</td><td>No deduction — treated as Met per §170.24</td></tr>
+<tr style="font-weight:bold;"><td>Total Controls</td><td>${impl+part+none+na}</td><td><strong>SPRS Score: ${sprsScore}/110</strong></td></tr>
+</table>
+
+${result.ssp_missing ? '<div class="warn">⚠ WARNING: System Security Plan (3.12.4) is not marked as Implemented. Under 32 CFR 170.24, a current SSP is a prerequisite — without it, the assessment cannot be completed. Implement 3.12.4 before submitting to SPRS.</div>' : ''}
+
+<div style="font-size:10px;color:#64748B;margin-top:8px;">
+Scoring per NIST SP 800-171 DoD Assessment Methodology v1.2.1 / 32 CFR 170.24.
+MFA (3.5.3) and FIPS encryption (3.13.11) apply partial credit rules.
+This score is self-attested. False attestation carries False Claims Act liability (31 U.S.C. §§ 3729–3733).
+</div>
+
+<!-- DOCUMENT 2: POA&M -->
+<div class="page-break"></div>
+<h2>Document 2 of 4 — Plan of Action & Milestones (POA&M)</h2>
+<p style="font-size:11px;color:#64748B;margin-bottom:12px;">
+Organization: ${c.name||'[Name]'} · CAGE: ${c.cage||'[CAGE]'} · Date: ${today}
+</p>
+
+${gaps.length === 0 ? '<p style="color:#059669;font-weight:bold;">✓ No open POA&M items — all controls implemented or N/A.</p>' : `
+<table>
+<tr><th style="width:70px;">Control</th><th style="width:50px;">Points</th><th>Requirement</th><th style="width:120px;">Current Status</th><th style="width:110px;">Target Date</th></tr>
+${gaps.map((id, i) => {
+  const resp = getResp(id) || {};
+  const s = resp.status || 'not-reviewed';
+  const w = getControlWeight(id, s);
+  const target = new Date();
+  target.setDate(target.getDate() + (w >= 5 ? 90 : w >= 3 ? 120 : 180));
+  const targetStr = target.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const ctrlData = (typeof QUESTIONS_FLAT !== 'undefined' ? QUESTIONS_FLAT : []).find(c => c.id === id);
+  const req = ctrlData ? ctrlData.req : (typeof DOMAINS !== 'undefined' ? (DOMAINS.flatMap(d=>d.controls).find(c=>c.id===id)||{req:'[Requirement]'}).req : '[Requirement]');
+  const chip = s==='partial'?'⚡ Partial':'✗ Not Implemented';
+  return `<tr style="background:${i%2===0?'white':'#F8FAFC'}">
+    <td style="font-weight:bold;color:#0099CC;">${id}</td>
+    <td style="text-align:center;color:${w>=5?'#DC2626':w>=3?'#D97706':'#64748B'};font-weight:bold;">${w===0?'Gate':w}</td>
+    <td>${req}</td>
+    <td>${chip}</td>
+    <td>${targetStr}</td>
+  </tr>`;
+}).join('')}
+</table>
+<p style="font-size:10px;color:#64748B;">All POA&M items must include a realistic completion date. Conditional CMMC Level 2 status requires score ≥88 with only 1-point gaps on the POA&M (per 32 CFR 170.21).</p>`}
+
+<!-- DOCUMENT 3: SSP SUMMARY -->
+<div class="page-break"></div>
+<h2>Document 3 of 4 — System Security Plan (SSP) Summary</h2>
+<p style="font-size:11px;color:#64748B;margin-bottom:12px;">
+This is a summary SSP. Organizations must maintain a full SSP per NIST SP 800-171 control 3.12.4. This document establishes the SSP record for SPRS submission purposes.
+</p>
+<table><tr><th colspan="2">System Identification</th></tr>
+<tr><td>Organization</td><td>${c.name||'[Name]'}</td></tr>
+<tr><td>CAGE Code</td><td>${c.cage||'[CAGE]'}</td></tr>
+<tr><td>Primary Contract / Prime</td><td>${c.contract||'[Contract/Prime]'}</td></tr>
+<tr><td>System Name</td><td>${c.name||'[Org]'} Information System</td></tr>
+<tr><td>Assessment Date</td><td>${today}</td></tr>
+<tr><td>SPRS Score</td><td style="font-weight:bold;color:${sprsColor};">${sprsScore}/110</td></tr>
+<tr><td>Date Score of 110 Expected</td><td>[Complete POA&M to determine]</td></tr>
+</table>
+
+<h3>Control Implementation Summary by Domain</h3>
+${typeof DOMAINS !== 'undefined' ? DOMAINS.map(d => {
+  const total = d.controls.length;
+  const dimpl = d.controls.filter(c => getResp(c.id).status === 'implemented').length;
+  return `<div style="display:flex;justify-content:space-between;padding:4px 8px;margin-bottom:2px;background:${dimpl===total?'#ECFDF5':dimpl>total/2?'#FFFBEB':'#FEF2F2'};border-radius:4px;font-size:11px;">
+    <span style="font-weight:bold;">${d.id} — ${d.name}</span>
+    <span>${dimpl}/${total} implemented</span>
+  </div>`;
+}).join('') : '<p>Domain data not available in this view.</p>'}
+
+<!-- DOCUMENT 4: AFFIRMING OFFICIAL LETTER -->
+<div class="page-break"></div>
+<h2>Document 4 of 4 — Affirming Official Attestation Letter</h2>
+
+<div style="border:2px solid #D97706;border-radius:6px;padding:16px;margin-bottom:16px;background:#FFFBEB;">
+<p style="font-size:11px;color:#854F0B;font-weight:bold;margin-bottom:8px;">⚠ LEGAL NOTICE — READ CAREFULLY BEFORE SIGNING</p>
+<p style="font-size:11px;color:#64748B;line-height:1.7;">
+This attestation constitutes a legal representation to the United States federal government. Knowingly submitting a false or inaccurate SPRS score is subject to civil and criminal penalties under the False Claims Act (31 U.S.C. §§ 3729–3733), including treble damages, civil monetary penalties, and federal criminal prosecution. The Affirming Official signing this document is personally attesting to its accuracy.
+</p>
+</div>
+
+<p style="font-size:12px;line-height:1.8;">
+${today}<br/><br/>
+To: Defense Contracting Officer / Supplier Performance Risk System (SPRS)<br/>
+Re: NIST SP 800-171 Self-Assessment Attestation — ${c.name||'[Organization Name]'}<br/><br/>
+I, ${c.contact||'[Affirming Official Name]'}, ${c.role||'[Title]'} of ${c.name||'[Organization]'}, hereby attest that:
+</p>
+
+<ol style="font-size:12px;line-height:1.9;margin:12px 0 12px 20px;">
+<li>${c.name||'[Organization]'} has conducted a self-assessment of its information systems against all 110 security requirements of NIST SP 800-171 Revision 2 in accordance with the NIST SP 800-171 DoD Assessment Methodology.</li>
+<li>The SPRS score resulting from this assessment is <strong style="color:${sprsColor};">${sprsScore} out of 110</strong>, assessed on ${today}.</li>
+<li>A current System Security Plan (SSP) exists describing the organizational information systems and the implementation status of all 110 security requirements.</li>
+<li>${gaps.length > 0 ? `A Plan of Action & Milestones (POA&M) documents ${gaps.length} requirements not yet fully implemented, with projected completion dates.` : 'All 110 security requirements are fully implemented. No POA&M items remain open.'}</li>
+<li>This attestation is accurate and complete to the best of my knowledge and belief.</li>
+</ol>
+
+<p style="font-size:12px;line-height:1.8;">
+I understand that knowingly providing false information in this attestation may subject ${c.name||'[Organization]'} and its officers to civil and criminal liability under federal law.
+</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px;">
+<div>
+<div class="sig-line"></div>
+<div style="font-size:11px;color:#64748B;">Affirming Official Signature</div>
+<div style="font-size:11px;margin-top:4px;">${c.contact||'[Name]'}, ${c.role||'[Title]'}<br/>${c.name||'[Organization]'}</div>
+</div>
+<div>
+<div class="sig-line"></div>
+<div style="font-size:11px;color:#64748B;">Date Signed</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:20px;">
+<div>
+<div class="sig-line" style="border-color:#0099CC;"></div>
+<div style="font-size:11px;color:#0099CC;">Practitioner Review — ClearanceIQ</div>
+<div style="font-size:11px;margin-top:4px;">/Amrit Soni/ — Founder, ClearanceIQ Inc.</div>
+</div>
+<div>
+<div class="sig-line" style="border-color:#0099CC;"></div>
+<div style="font-size:11px;color:#0099CC;">Review Date</div>
+</div>
+</div>
+
+<div style="text-align:center;font-size:9px;color:#CBD5E0;margin-top:32px;padding-top:16px;border-top:1px solid #F0F4FA;">
+Generated by ClearanceIQ™ · Rapid Supply Chain Solutions LLC / ClearanceIQ Inc. · Patent Pending 64/110,963 · 64/110,968 · 64/111,830 · ${today}
+</div>
+
+</body></html>`);
+  pkgWindow.document.close();
 }
 
 </script>
