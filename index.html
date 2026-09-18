@@ -239,6 +239,12 @@ footer p{font-size:11px;color:#283848;}
         Begin Certification Workflow →
       </button>
       <p style="font-size:12px;color:var(--slate);margin-top:10px;">Estimated time: 60–90 minutes · Assessment free · Documents from $999</p>
+      <div style="margin-top:12px;">
+        <button onclick="uploadProgress()"
+          style="background:transparent;color:var(--cyan);border:2px solid var(--cyan);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+          📂 Load Saved Progress
+        </button>
+      </div>
     </div>
   </div>
 
@@ -416,7 +422,7 @@ footer p{font-size:11px;color:#283848;}
     <div class="btn-row">
       <button class="btn-back" onclick="goToDomain(DOMAINS.length-1)">← Edit Controls</button>
       <button class="btn-primary" onclick="showScreen('screen-payment')" style="margin-right:10px;">Get My Documents & Submit →</button>
-      <button class="btn-back" onclick="generateSubmissionPackage()" style="background:linear-gradient(135deg,#059669,#047857);color:white;border:none;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">⬇ Preview Documents (Free)</button>
+      <button class="btn-back" onclick="generateSubmissionPackage()" style="background:linear-gradient(135deg,#059669,#047857);color:white;border:none;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">📊 Preview My Score (Free)</button>
     </div>
   </div>
 
@@ -597,6 +603,7 @@ function setResp(id, key, val) {
   if(!state.responses[id]) state.responses[id] = {};
   state.responses[id][key] = val;
   updateProgress();
+  autosave();
 }
 
 // ── PROGRESS ────────────────────────────────────────────────────────────────
@@ -686,9 +693,15 @@ function buildDomainScreens() {
       <div id="d${di}-controls"></div>
       <div class="btn-row">
         ${di > 0 ? `<button class="btn-back" onclick="goToDomain(${di-1})">← ${DOMAINS[di-1].name}</button>` : '<div/>'}
-        <button class="btn-next" onclick="goToDomain(${di+1})" id="d${di}-next">
-          ${di < DOMAINS.length-1 ? `${DOMAINS[di+1].name} →` : 'Review SSP →'}
-        </button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button onclick="downloadProgress()" title="Download progress backup"
+            style="padding:10px 14px;background:rgba(7,16,31,.06);color:#405570;border:2px solid #CBD5E0;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;">
+            💾 Save
+          </button>
+          <button class="btn-next" onclick="goToDomain(${di+1})" id="d${di}-next">
+            ${di < DOMAINS.length-1 ? `${DOMAINS[di+1].name} →` : 'Review SSP →'}
+          </button>
+        </div>
       </div>`;
 
     container.appendChild(screen);
@@ -1053,29 +1066,144 @@ const QUESTIONS_FLAT = [
 
 function pay(tier) {
   const url = STRIPE[tier];
+  const tierNames = {
+    basic:'Quick Start — $999',
+    certify:'Expert Review — $3,500',
+    premium:'CERTIFY Premium — $8,000',
+    defend_s:'DEFEND Standard — $8,000/yr',
+    defend_p:'DEFEND Premium — $20,000/yr'
+  };
+
   if (!url || url.includes('REPLACE')) {
-    // Stripe not yet configured — capture via Formspree
-    const email = prompt('Enter your email — our team will contact you to complete payment:');
-    if (email && email.includes('@')) {
-      const tierNames = {basic:'$999 Quick Start', certify:'$3,500 CERTIFY', premium:'$8,000 CERTIFY Premium', defend_s:'$8,000/yr DEFEND', defend_p:'$20,000/yr DEFEND Premium'};
-      fetch('https://formspree.io/f/xwvgkjvk', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          type: 'PAYMENT_REQUEST',
-          tier: tierNames[tier] || tier,
-          email: email,
-          company: state.company.name || 'Not provided',
-          _subject: 'Payment Request: ' + (tierNames[tier]||tier) + ' — ' + (state.company.name||email),
-          _replyto: email
-        })
-      }).catch(() => {});
-      alert('Got it! Our team will email you at ' + email + ' within 2 hours to complete your ' + (tierNames[tier]||tier) + ' purchase.');
-      submitCertify();
-    }
+    // Stripe pending — show inline payment capture form
+    showPaymentForm(tier, tierNames[tier] || tier);
   } else {
     window.open(url, '_blank');
   }
+}
+
+function showPaymentForm(tier, tierLabel) {
+  // Replace payment screen content with clean form
+  const inner = document.querySelector('.pay-inner');
+  if (!inner) return;
+
+  inner.innerHTML = `
+    <div style="max-width:520px;margin:0 auto;padding:40px 0;">
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="font-size:40px;margin-bottom:8px;">🛡️</div>
+        <h2 style="font-size:28px;font-weight:900;color:#070F1E;font-family:'Barlow Condensed',sans-serif;margin-bottom:8px;">
+          You selected: ${tierLabel}
+        </h2>
+        <p style="font-size:14px;color:#64748B;">Complete the form below and our team will contact you within 2 business hours to process your payment and begin your compliance package.</p>
+      </div>
+
+      <div style="background:white;border:2px solid #E2E8F0;border-radius:16px;padding:28px;">
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Full Name *</label>
+          <input id="pf-name" type="text" value="${state.company.contact||''}"
+            style="width:100%;padding:12px;border:2px solid #E2E8F0;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;"
+            placeholder="Your full name"/>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Work Email *</label>
+          <input id="pf-email" type="email" value="${state.company.email||''}"
+            style="width:100%;padding:12px;border:2px solid #E2E8F0;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;"
+            placeholder="you@company.com"/>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Company Name *</label>
+          <input id="pf-company" type="text" value="${state.company.name||''}"
+            style="width:100%;padding:12px;border:2px solid #E2E8F0;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;"
+            placeholder="Your company name"/>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">Phone (optional)</label>
+          <input id="pf-phone" type="tel"
+            style="width:100%;padding:12px;border:2px solid #E2E8F0;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;"
+            placeholder="+1 (949) 000-0000"/>
+        </div>
+
+        <div style="background:#E0F7FD;border-radius:8px;padding:12px;margin-bottom:20px;font-size:12px;color:#0D4F6B;">
+          ✓ No payment information collected here · Our team contacts you to process payment securely · Documents delivered within 2 business hours of payment
+        </div>
+
+        <button onclick="submitPaymentForm('${tier}','${tierLabel}')"
+          style="width:100%;padding:16px;background:#7C3AED;color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;"
+          onmouseover="this.style.background='#6D28D9'" onmouseout="this.style.background='#7C3AED'">
+          Request ${tierLabel} →
+        </button>
+        <button onclick="showScreen('screen-payment')"
+          style="width:100%;padding:12px;background:transparent;color:#64748B;border:1px solid #E2E8F0;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-top:10px;">
+          ← Change package
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function submitPaymentForm(tier, tierLabel) {
+  const name = document.getElementById('pf-name')?.value || '';
+  const email = document.getElementById('pf-email')?.value || '';
+  const company = document.getElementById('pf-company')?.value || '';
+  const phone = document.getElementById('pf-phone')?.value || '';
+
+  if (!name || !email || !email.includes('@') || !company) {
+    const fields = document.querySelectorAll('#pf-name,#pf-email,#pf-company');
+    fields.forEach(f => { if(!f.value) f.style.borderColor='#DC2626'; });
+    return;
+  }
+
+  const btn = document.querySelector('.pay-inner button');
+  if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
+
+  const sprsResult = calculateSPRSAccurate();
+
+  fetch('https://formspree.io/f/xwvgkjvk', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      type: 'PAYMENT_REQUEST',
+      tier: tierLabel,
+      name: name,
+      email: email,
+      company: company,
+      phone: phone,
+      sprs_score: sprsResult.score,
+      _subject: '🔔 New Client: ' + tierLabel + ' — ' + company,
+      _replyto: email
+    })
+  }).then(() => {
+    submitCertify();
+    showPaymentConfirmation(name, email, tierLabel);
+  }).catch(() => {
+    showPaymentConfirmation(name, email, tierLabel);
+  });
+}
+
+function showPaymentConfirmation(name, email, tierLabel) {
+  const inner = document.querySelector('.pay-inner');
+  if (!inner) return;
+  inner.innerHTML = `
+    <div style="max-width:520px;margin:0 auto;padding:60px 0;text-align:center;">
+      <div style="font-size:64px;margin-bottom:16px;">✅</div>
+      <h2 style="font-size:32px;font-weight:900;color:#070F1E;font-family:'Barlow Condensed',sans-serif;margin-bottom:8px;">
+        Request Received
+      </h2>
+      <p style="font-size:16px;color:#64748B;margin-bottom:24px;">
+        Thank you, ${name}. Our team will email <strong>${email}</strong> within 2 business hours to process your <strong>${tierLabel}</strong> payment and begin your compliance package.
+      </p>
+      <div style="background:#ECFDF5;border:2px solid #A7F3D0;border-radius:12px;padding:20px;text-align:left;margin-bottom:24px;">
+        <div style="font-size:13px;font-weight:700;color:#065F46;margin-bottom:10px;">What happens next:</div>
+        <div style="font-size:13px;color:#064E3B;line-height:2;">
+          1. You'll receive a payment link via email within 2 business hours<br/>
+          2. After payment, your compliance documents are delivered same day<br/>
+          3. Our team reviews your responses and contacts you if anything needs clarification<br/>
+          4. Your complete SPRS submission package is ready to sign
+        </div>
+      </div>
+      <p style="font-size:12px;color:#94A3B8;">Questions? Email hello@clearanceiq.io</p>
+    </div>
+  `;
 }
 
 // ── DOCUMENT GENERATION (print-to-PDF) ──────────────────────────
@@ -1127,7 +1255,7 @@ function buildSSPDoc() {
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
     + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">Organization</div><div style="font-size:13px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;">' + (c.name||'[Name]') + '</div></div>'
     + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">CAGE Code</div><div style="font-size:13px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;">' + (c.cage||'[CAGE]') + '</div></div>'
-    + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">Affirming Official</div><div style="font-size:13px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;">' + (c.contact||'[Contact]') + ', ' + (c.role||'[Title]') + '</div></div>'
+    + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">Affirming Official</div><div style="font-size:13px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;">' + (c.contact||'[Contact]') + ', ' + (c.role||'Authorized Representative') + '</div></div>'
     + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">Email</div><div style="font-size:13px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;">' + (c.email||'[Email]') + '</div></div>'
     + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">SPRS Score (Est.)</div><div style="font-size:18px;font-weight:700;color:' + (sprs<0?'#DC2626':sprs<80?'#D97706':'#059669') + ';border-left:3px solid #E0F7FD;padding-left:8px;">' + sprs + ' / 110</div></div>'
     + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">Assessment Date</div><div style="font-size:13px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;">' + today + '</div></div>'
@@ -1155,12 +1283,12 @@ function buildSSPDoc() {
     + '<div style="font-size:12px;font-weight:700;color:#854F0B;margin-bottom:8px;">Affirming Official Attestation</div>'
     + '<div style="font-size:12px;color:#64748B;line-height:1.7;margin-bottom:16px;">By signing, the Affirming Official attests this SSP accurately represents the organization&apos;s cybersecurity posture. False attestation is subject to False Claims Act penalties (31 U.S.C. &sect;&sect; 3729-3733).</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">'
-    + '<div><div style="font-size:11px;color:#64748B;margin-bottom:4px;">Affirming Official Signature</div><div style="height:48px;border-bottom:2px solid #CBD5E0;"></div><div style="font-size:10px;color:#94A3B8;margin-top:4px;">' + (c.contact||'[Name]') + ', ' + (c.role||'[Title]') + '</div></div>'
+    + '<div><div style="font-size:11px;color:#64748B;margin-bottom:4px;">Affirming Official Signature</div><div style="height:48px;border-bottom:2px solid #CBD5E0;"></div><div style="font-size:10px;color:#94A3B8;margin-top:4px;">' + (c.contact||'[Name]') + ', ' + (c.role||'Authorized Representative') + '</div></div>'
     + '<div><div style="font-size:11px;color:#64748B;margin-bottom:4px;">Date</div><div style="height:48px;border-bottom:2px solid #CBD5E0;"></div></div>'
     + '<div><div style="font-size:11px;color:#0099CC;margin-bottom:4px;">Practitioner Review (ClearanceIQ)</div><div style="height:48px;border-bottom:2px solid #00C8F0;"></div><div style="font-size:10px;color:#94A3B8;margin-top:4px;">/ClearanceIQ Review Team/ &mdash; ClearanceIQ Inc.</div></div>'
     + '<div><div style="font-size:11px;color:#0099CC;margin-bottom:4px;">Review Date</div><div style="height:48px;border-bottom:2px solid #00C8F0;"></div></div>'
     + '</div></div>'
-    + '<div style="text-align:center;font-size:10px;color:#CBD5E0;margin-top:24px;padding-top:12px;border-top:1px solid #F0F4FA;">Generated by ClearanceIQ&trade; &middot; Patent Pending 64/110,963 &middot; 64/110,968 &middot; 64/111,830 &middot; ' + today + '</div>';
+    + '<div style="text-align:center;font-size:10px;color:#CBD5E0;margin-top:24px;padding-top:12px;border-top:1px solid #F0F4FA;">Generated by ClearanceIQ&trade; &middot; ClearanceIQ Inc. &middot; Patent Pending 64/110,963 &middot; 64/110,968 &middot; 64/111,830 &middot; ' + today + '</div>';
 
   document.getElementById('doc-content').innerHTML = html;
 }
@@ -1294,7 +1422,14 @@ function calculateSPRSAccurate() {
 }
 
 // ── SUBMISSION PACKAGE GENERATOR ─────────────────────────────────
-function generateSubmissionPackage() {
+function generateSubmissionPackage(paid) {
+  // Free preview shows Doc 1 only + watermarked rest
+  // paid=true unlocks full package (set after payment confirmation)
+  const isPaid = paid === true || state.paid === true;
+  if (!isPaid) {
+    showFreePreview();
+    return;
+  }
   const result = calculateSPRSAccurate();
   const c = state.company;
   const today = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
@@ -1361,7 +1496,7 @@ td{padding:6px 10px;border-bottom:1px solid #E2E8F0;font-size:11px;vertical-alig
 <table><tr><th colspan="2">Organization Information</th></tr>
 <tr><td><strong>Organization</strong></td><td>${c.name||'[Name]'}</td></tr>
 <tr><td><strong>CAGE Code</strong></td><td>${c.cage||'[CAGE Code]'}</td></tr>
-<tr><td><strong>Affirming Official</strong></td><td>${c.contact||'[Name]'}, ${c.role||'[Title]'}</td></tr>
+<tr><td><strong>Affirming Official</strong></td><td>${c.contact||'[Name]'}, ${c.role||'Authorized Representative'}</td></tr>
 <tr><td><strong>Assessment Date</strong></td><td>${today}</td></tr>
 <tr><td><strong>SSP Name/Version</strong></td><td>${c.name||'[Org]'} SSP v1.0 — ${dateCode}</td></tr>
 <tr><td><strong>Scoring Standard</strong></td><td>NIST SP 800-171 Rev 2</td></tr>
@@ -1464,7 +1599,7 @@ This attestation constitutes a legal representation to the United States federal
 ${today}<br/><br/>
 To: Defense Contracting Officer / Supplier Performance Risk System (SPRS)<br/>
 Re: NIST SP 800-171 Self-Assessment Attestation — ${c.name||'[Organization Name]'}<br/><br/>
-I, ${c.contact||'[Affirming Official Name]'}, ${c.role||'[Title]'} of ${c.name||'[Organization]'}, hereby attest that:
+I, ${c.contact||'[Affirming Official Name]'}, ${c.role||'Authorized Representative'} of ${c.name||'[Organization]'}, hereby attest that:
 </p>
 
 <ol style="font-size:12px;line-height:1.9;margin:12px 0 12px 20px;">
@@ -1483,7 +1618,7 @@ I understand that knowingly providing false information in this attestation may 
 <div>
 <div class="sig-line"></div>
 <div style="font-size:11px;color:#64748B;">Affirming Official Signature</div>
-<div style="font-size:11px;margin-top:4px;">${c.contact||'[Name]'}, ${c.role||'[Title]'}<br/>${c.name||'[Organization]'}</div>
+<div style="font-size:11px;margin-top:4px;">${c.contact||'[Name]'}, ${c.role||'Authorized Representative'}<br/>${c.name||'[Organization]'}</div>
 </div>
 <div>
 <div class="sig-line"></div>
@@ -1504,12 +1639,278 @@ I understand that knowingly providing false information in this attestation may 
 </div>
 
 <div style="text-align:center;font-size:9px;color:#CBD5E0;margin-top:32px;padding-top:16px;border-top:1px solid #F0F4FA;">
-Generated by ClearanceIQ™ · Rapid Supply Chain Solutions LLC / ClearanceIQ Inc. · Patent Pending 64/110,963 · 64/110,968 · 64/111,830 · ${today}
+Generated by ClearanceIQ™ · ClearanceIQ Inc. · Patent Pending 64/110,963 · 64/110,968 · 64/111,830 · ${today}
 </div>
 
 </body></html>`);
   pkgWindow.document.close();
 }
+
+
+function showFreePreview() {
+  const sprsResult = calculateSPRSAccurate();
+  const c = state.company;
+  const score = sprsResult.score;
+  const sprsColor = score >= 88 ? '#059669' : score >= 0 ? '#D97706' : '#DC2626';
+  const statusLabel = score >= 110 ? 'FINAL — Fully Compliant' : score >= 88 ? 'CONDITIONAL — Score ≥88' : 'GAPS IDENTIFIED — POA&M Required';
+
+  const allControls = typeof DOMAINS !== 'undefined' ? DOMAINS.flatMap(d=>d.controls.map(c=>c.id)) :
+    (typeof QUESTIONS_FLAT !== 'undefined' ? QUESTIONS_FLAT.map(c=>c.id) : []);
+  const impl = allControls.filter(id => getResp(id).status === 'implemented').length;
+  const part = allControls.filter(id => getResp(id).status === 'partial').length;
+  const none = allControls.filter(id => !getResp(id).status || getResp(id).status === 'not-implemented').length;
+  const answered = impl + part + none;
+
+  // Show preview screen
+  showScreen('screen-docs');
+  document.getElementById('doc-content').innerHTML = `
+    <!-- SPRS SCORE — ALWAYS FREE -->
+    <div style="text-align:center;padding:32px;background:linear-gradient(135deg,#F8FAFC,#EFF6FF);border-radius:16px;margin-bottom:24px;border:2px solid #E2E8F0;">
+      <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">Your Estimated SPRS Score</div>
+      <div style="font-size:72px;font-weight:900;color:${sprsColor};font-family:'Barlow Condensed',sans-serif;line-height:1;">${score}</div>
+      <div style="font-size:13px;color:#64748B;margin-bottom:8px;">out of 110 &nbsp;·&nbsp; Range: -203 to +110</div>
+      <div style="font-size:14px;font-weight:700;color:${sprsColor};">${statusLabel}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px;max-width:400px;margin-left:auto;margin-right:auto;">
+        <div style="background:white;border-radius:8px;padding:12px;border:1px solid #E2E8F0;">
+          <div style="font-size:24px;font-weight:900;color:#059669;">${impl}</div>
+          <div style="font-size:11px;color:#64748B;">Implemented</div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:12px;border:1px solid #E2E8F0;">
+          <div style="font-size:24px;font-weight:900;color:#D97706;">${part}</div>
+          <div style="font-size:11px;color:#64748B;">Partial</div>
+        </div>
+        <div style="background:white;border-radius:8px;padding:12px;border:1px solid #E2E8F0;">
+          <div style="font-size:24px;font-weight:900;color:#DC2626;">${none}</div>
+          <div style="font-size:11px;color:#64748B;">Not Implemented</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCKED DOCUMENTS -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:12px;">Your CMMC Compliance Package includes:</div>
+
+      ${['Plan of Action & Milestones (POA&M)','System Security Plan (SSP)','Affirming Official Attestation Letter'].map(doc => `
+        <div style="background:#F8FAFC;border:2px dashed #CBD5E0;border-radius:12px;padding:20px;margin-bottom:12px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;">
+          <div style="font-size:32px;">🔒</div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#334155;">${doc}</div>
+            <div style="font-size:12px;color:#94A3B8;">Select a package below to unlock this document</div>
+          </div>
+          <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(148,163,184,.05) 10px,rgba(148,163,184,.05) 20px);pointer-events:none;"></div>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- PAYMENT CTA -->
+    <div style="background:linear-gradient(135deg,#1E1B4B,#312E81);border-radius:16px;padding:32px;text-align:center;color:white;">
+      <div style="font-size:22px;font-weight:900;font-family:'Barlow Condensed',sans-serif;margin-bottom:8px;">
+        Unlock Your Complete Compliance Package
+      </div>
+      <p style="font-size:14px;color:#C7D2FE;margin-bottom:24px;">
+        Your POA&M, SSP, and Affirming Official Letter are ready — select a package to download everything.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+        <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:16px;cursor:pointer;" onclick="showScreen('screen-payment')">
+          <div style="font-size:18px;font-weight:900;font-family:'Barlow Condensed',sans-serif;">$999</div>
+          <div style="font-size:11px;color:#C7D2FE;">Do It Yourself</div>
+        </div>
+        <div style="background:rgba(0,200,240,.2);border:2px solid #00C8F0;border-radius:10px;padding:16px;cursor:pointer;" onclick="showScreen('screen-payment')">
+          <div style="font-size:18px;font-weight:900;font-family:'Barlow Condensed',sans-serif;">$3,500</div>
+          <div style="font-size:11px;color:#00C8F0;">With Expert Review ✦</div>
+        </div>
+        <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:16px;cursor:pointer;" onclick="showScreen('screen-payment')">
+          <div style="font-size:18px;font-weight:900;font-family:'Barlow Condensed',sans-serif;">$8,000</div>
+          <div style="font-size:11px;color:#C7D2FE;">Full Protection /yr</div>
+        </div>
+      </div>
+      <button onclick="showScreen('screen-payment')"
+        style="background:#00C8F0;color:#070F1E;border:none;padding:16px 48px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">
+        Choose My Package →
+      </button>
+    </div>
+  `;
+
+  // Hide the print/tab switch buttons since this is preview only
+  const docHeader = document.getElementById('no-print');
+  if (docHeader) docHeader.style.display = 'none';
+}
+
+
+// ── SAVE & RESTORE PROGRESS ──────────────────────────────────────
+const SAVE_KEY = 'ciq_certify_v1';
+
+function autosave() {
+  try {
+    const snapshot = {
+      company: state.company,
+      responses: state.responses,
+      currentDomain: state.currentDomain,
+      savedAt: new Date().toISOString(),
+      version: 1
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
+    showSaveIndicator();
+  } catch(e) {
+    // localStorage unavailable — silent fail
+  }
+}
+
+function showSaveIndicator() {
+  let ind = document.getElementById('save-indicator');
+  if (!ind) {
+    ind = document.createElement('div');
+    ind.id = 'save-indicator';
+    ind.style.cssText = 'position:fixed;bottom:16px;right:16px;background:#059669;color:white;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;font-family:Inter,sans-serif;z-index:9999;transition:opacity .5s;pointer-events:none;';
+    document.body.appendChild(ind);
+  }
+  ind.textContent = '✓ Progress saved';
+  ind.style.opacity = '1';
+  setTimeout(() => { ind.style.opacity = '0'; }, 2000);
+}
+
+function hasSavedProgress() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    return data && data.company && data.company.name;
+  } catch(e) { return false; }
+}
+
+function loadSavedProgress() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+function restoreProgress() {
+  const saved = loadSavedProgress();
+  if (!saved) return;
+
+  // Restore state
+  state.company = saved.company || {};
+  state.responses = saved.responses || {};
+  state.currentDomain = saved.currentDomain || 0;
+
+  // Restore company form fields
+  const fields = {
+    'co-name': state.company.name,
+    'co-cage': state.company.cage,
+    'co-contact': state.company.contact,
+    'co-email': state.company.email,
+    'co-role': state.company.role,
+    'co-size': state.company.size,
+    'co-contract': state.company.contract
+  };
+  Object.entries(fields).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el && val) el.value = val;
+  });
+
+  // Go straight to domain screen
+  buildDomainScreens();
+  goToDomain(state.currentDomain || 0);
+  showSaveIndicator();
+
+  // Hide the resume banner
+  const banner = document.getElementById('resume-banner');
+  if (banner) banner.remove();
+}
+
+function clearSavedProgress() {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+}
+
+function downloadProgress() {
+  const snapshot = {
+    company: state.company,
+    responses: state.responses,
+    currentDomain: state.currentDomain,
+    savedAt: new Date().toISOString(),
+    tool: 'ClearanceIQ CERTIFY',
+    version: 1
+  };
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const co = state.company.name ? state.company.name.replace(/[^a-zA-Z0-9]/g, '_') : 'progress';
+  a.download = 'ClearanceIQ_' + co + '_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function uploadProgress() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data.company || !data.responses) {
+          alert('Invalid progress file. Please use a file exported from ClearanceIQ CERTIFY.');
+          return;
+        }
+        state.company = data.company;
+        state.responses = data.responses;
+        state.currentDomain = data.currentDomain || 0;
+        autosave();
+        buildDomainScreens();
+        goToDomain(state.currentDomain);
+        alert('Progress restored! Resuming from where you left off.');
+      } catch(err) {
+        alert('Could not read progress file. Please try again.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// ── SHOW RESUME BANNER ON INTRO SCREEN ────────────────────────────
+function checkForSavedProgress() {
+  if (!hasSavedProgress()) return;
+  const saved = loadSavedProgress();
+  if (!saved) return;
+
+  const savedDate = saved.savedAt ? new Date(saved.savedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'recently';
+  const ctrlsDone = Object.keys(saved.responses || {}).length;
+
+  // Create resume banner
+  const banner = document.createElement('div');
+  banner.id = 'resume-banner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;background:linear-gradient(135deg,#065F46,#047857);color:white;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:Inter,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.3);';
+  banner.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="font-size:24px;">💾</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;">Saved progress found — ${saved.company?.name || 'your company'}</div>
+        <div style="font-size:12px;color:#A7F3D0;">${ctrlsDone} of 110 controls completed · Last saved ${savedDate}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;">
+      <button onclick="restoreProgress()"
+        style="background:#10B981;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
+        Resume Where I Left Off →
+      </button>
+      <button onclick="clearSavedProgress();document.getElementById('resume-banner').remove();"
+        style="background:transparent;color:#A7F3D0;border:2px solid #A7F3D0;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">
+        Start Fresh
+      </button>
+    </div>
+  `;
+  document.body.insertBefore(banner, document.body.firstChild);
+}
+
+// Run on page load
+window.addEventListener('load', checkForSavedProgress);
 
 </script>
 </body>
