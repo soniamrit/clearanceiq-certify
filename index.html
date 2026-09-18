@@ -251,50 +251,141 @@ footer p{font-size:11px;color:#283848;}
     <div class="pay-screen">
       <div class="pay-inner">
         <div style="text-align:center;margin-bottom:32px;">
-          <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:8px;">Choose Your Package</div>
-          <h2 style="font-size:36px;font-weight:900;color:var(--navy);font-family:'Barlow Condensed',sans-serif;margin-bottom:8px;">Generate Your Compliance Documents</h2>
-          <p style="font-size:16px;color:var(--slate);">All packages include your SSP, POA&M, and SPRS submission letter — generated from your actual assessment responses.</p>
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:8px;">✓ Assessment Complete — Choose Your CERTIFY Package</div>
+          <h2 style="font-size:36px;font-weight:900;color:var(--navy);font-family:'Barlow Condensed',sans-serif;margin-bottom:8px;">Get Your Official Compliance Package</h2>
+          <p style="font-size:16px;color:var(--slate);max-width:600px;margin:0 auto 12px;">You have completed your CMMC Level 2 self-assessment. Select a package to generate your official compliance documents — ready to sign and submit to SPRS.</p>
+          <div style="background:#E0F7FD;border-radius:10px;padding:12px 20px;display:inline-block;font-size:13px;color:#0D4F6B;">
+            💡 <strong>Free:</strong> Assessment completed · <strong>Paid:</strong> Official documents + expert review
+          </div>
         </div>
 
-        <div class="tier-select">
-          <!-- BASIC $999 -->
-          <div class="pay-tier" onclick="selectTier('basic')">
-            <div class="pay-tier-name" style="color:#7C3AED;">Quick Start</div>
-            <div class="pay-tier-price" style="color:#7C3AED;">$999</div>
-            <div class="pay-tier-desc">Automated documents from your assessment. Download and review yourself.</div>
-            <div class="pay-tier-feat">System Security Plan (SSP)</div>
-            <div class="pay-tier-feat">Plan of Action & Milestones (POA&M)</div>
-            <div class="pay-tier-feat">SPRS submission letter</div>
-            <div class="pay-tier-feat">Evidence register</div>
-            <div class="pay-tier-feat" style="color:#CBD5E0;">Expert review not included</div>
-            <button class="btn-pay" onclick="pay('basic')">Get Documents — $999 →</button>
+        <!-- WHO IS THIS FOR — TurboTax style -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:16px;">
+
+          <!-- OPTION 1: SELF-SERVICE -->
+          <div style="border:2px solid #E2E8F0;border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;background:white;" onclick="selectTier('basic')" id="tier-basic">
+            <div style="text-align:center;margin-bottom:16px;">
+              <div style="font-size:32px;margin-bottom:4px;">📋</div>
+              <div style="font-size:11px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Do It Yourself</div>
+              <div style="font-size:28px;font-weight:900;color:#7C3AED;font-family:'Barlow Condensed',sans-serif;line-height:1;">$999</div>
+              <div style="font-size:11px;color:#94A3B8;">one-time</div>
+            </div>
+            <div style="background:#F5F3FF;border-radius:8px;padding:12px;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:700;color:#7C3AED;margin-bottom:4px;">Best for:</div>
+              <div style="font-size:12px;color:#64748B;line-height:1.5;">Companies with IT staff who understand the controls and want to review the documents themselves before signing.</div>
+            </div>
+            <div style="font-size:12px;color:#334155;margin-bottom:8px;font-weight:700;">What happens:</div>
+            <div style="font-size:12px;color:#64748B;line-height:1.8;">
+              1. Your responses generate documents instantly<br/>
+              2. You review the SSP and POA&M yourself<br/>
+              3. Your Affirming Official reviews and signs<br/>
+              4. You submit to SPRS
+            </div>
+            <div style="margin:14px 0;border-top:1px solid #F0F4FA;padding-top:12px;">
+              <div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Included:</div>
+              <div style="font-size:12px;color:#64748B;line-height:1.9;">
+                ✓ System Security Plan (SSP)<br/>
+                ✓ Plan of Action & Milestones (POA&M)<br/>
+                ✓ SPRS Score Worksheet<br/>
+                ✓ Affirming Official Letter<br/>
+                <span style="color:#CBD5E0;">✗ No expert review</span><br/>
+                <span style="color:#CBD5E0;">✗ No policy templates</span>
+              </div>
+            </div>
+            <div style="background:#FFF8F0;border:1px solid #FED7AA;border-radius:6px;padding:8px;margin-bottom:14px;font-size:11px;color:#92400E;">
+              ⚠ You are responsible for verifying all responses are accurate and defensible before your Affirming Official signs.
+            </div>
+            <button class="btn-pay" onclick="pay('basic')">Get My Documents — $999 →</button>
           </div>
 
-          <!-- CERTIFY $3,500-$8,000 -->
-          <div class="pay-tier featured" onclick="selectTier('certify')">
-            <div class="pay-tier-name" style="color:var(--cyan2);">CERTIFY ✦ Most Popular</div>
-            <div class="pay-tier-price" style="color:var(--cyan2);">$3,500</div>
-            <div class="pay-tier-desc">Full documents plus expert review before your Affirming Official signs.</div>
-            <div class="pay-tier-feat">Everything in Quick Start</div>
-            <div class="pay-tier-feat">Expert practitioner review</div>
-            <div class="pay-tier-feat">Practitioner countersignature</div>
-            <div class="pay-tier-feat">One revision cycle included</div>
-            <div class="pay-tier-feat">SPRS-ready artifact package</div>
-            <button class="btn-pay cyan" onclick="pay('certify')">Start CERTIFY — $3,500 →</button>
+          <!-- OPTION 2: EXPERT REVIEW -->
+          <div style="border:2px solid #00C8F0;border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,#F0FDFF,#F4FCFF);" onclick="selectTier('certify')" id="tier-certify">
+            <div style="text-align:center;margin-bottom:16px;">
+              <div style="background:#00C8F0;color:#070F1E;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;">✦ MOST POPULAR</div>
+              <div style="font-size:32px;margin-bottom:4px;">🛡️</div>
+              <div style="font-size:11px;font-weight:700;color:#0099CC;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">With Expert Review</div>
+              <div style="font-size:28px;font-weight:900;color:#0099CC;font-family:'Barlow Condensed',sans-serif;line-height:1;">$3,500</div>
+              <div style="font-size:11px;color:#94A3B8;">one-time</div>
+            </div>
+            <div style="background:#E0F7FD;border-radius:8px;padding:12px;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:700;color:#0099CC;margin-bottom:4px;">Best for:</div>
+              <div style="font-size:12px;color:#64748B;line-height:1.5;">Companies without dedicated IT security staff who want a professional to review their responses and make sure nothing is missing or vague before signing.</div>
+            </div>
+            <div style="font-size:12px;color:#334155;margin-bottom:8px;font-weight:700;">What happens:</div>
+            <div style="font-size:12px;color:#64748B;line-height:1.8;">
+              1. Your responses generate documents<br/>
+              2. <strong style="color:#334155;">A ClearanceIQ compliance professional reviews all 110 controls</strong><br/>
+              3. We flag any weak or vague descriptions<br/>
+              4. You make any updates (1 revision included)<br/>
+              5. ClearanceIQ adds practitioner review notation<br/>
+              6. Your Affirming Official signs and submits
+            </div>
+            <div style="margin:14px 0;border-top:1px solid #BAE6FD;padding-top:12px;">
+              <div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Included:</div>
+              <div style="font-size:12px;color:#64748B;line-height:1.9;">
+                ✓ Everything in Do It Yourself<br/>
+                ✓ Expert review of all 110 control responses<br/>
+                ✓ Practitioner review notation on SSP<br/>
+                ✓ Access Control Policy template<br/>
+                ✓ Incident Response Plan template<br/>
+                ✓ One revision cycle (48hr turnaround)
+              </div>
+            </div>
+            <div style="background:#E0F7FD;border:1px solid #BAE6FD;border-radius:6px;padding:8px;margin-bottom:14px;font-size:11px;color:#0D4F6B;">
+              💡 <strong>What "practitioner review" means:</strong> A ClearanceIQ compliance professional reviews your documentation for completeness and quality — not a formal CMMC certification, but a professional second set of eyes before your Affirming Official signs.
+            </div>
+            <button class="btn-pay cyan" onclick="pay('certify')">Start With Expert Review — $3,500 →</button>
           </div>
 
-          <!-- DEFEND $8,000/yr -->
-          <div class="pay-tier" onclick="selectTier('defend_s')">
-            <div class="pay-tier-name" style="color:#5B21B6;">DEFEND — Annual</div>
-            <div class="pay-tier-price" style="color:#5B21B6;">$8,000<span style="font-size:14px;font-weight:400;">/yr</span></div>
-            <div class="pay-tier-desc">Everything in CERTIFY plus AI Red Team stress-testing and annual recertification.</div>
-            <div class="pay-tier-feat">Everything in CERTIFY</div>
-            <div class="pay-tier-feat">AI Red Team — all 110 controls</div>
-            <div class="pay-tier-feat">False Claims Risk Report</div>
-            <div class="pay-tier-feat">Annual recertification cycle</div>
-            <div class="pay-tier-feat">Priority expert access</div>
-            <button class="btn-pay" style="background:#5B21B6;" onclick="pay('defend_s')">Start DEFEND — $8,000/yr →</button>
+          <!-- OPTION 3: FULL PROTECTION -->
+          <div style="border:2px solid #5B21B6;border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;background:linear-gradient(135deg,#FAF5FF,#F5F0FF);" onclick="selectTier('defend_s')" id="tier-defend">
+            <div style="text-align:center;margin-bottom:16px;">
+              <div style="font-size:32px;margin-bottom:4px;">🤖</div>
+              <div style="font-size:11px;font-weight:700;color:#5B21B6;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Full Protection</div>
+              <div style="font-size:28px;font-weight:900;color:#5B21B6;font-family:'Barlow Condensed',sans-serif;line-height:1;">$8,000</div>
+              <div style="font-size:11px;color:#94A3B8;">per year · includes CERTIFY</div>
+            </div>
+            <div style="background:#F3E8FF;border-radius:8px;padding:12px;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:700;color:#5B21B6;margin-bottom:4px;">Best for:</div>
+              <div style="font-size:12px;color:#64748B;line-height:1.5;">Companies with significant DoD contracts where False Claims Act exposure is highest — and those who want ongoing annual protection, not just a one-time certification.</div>
+            </div>
+            <div style="font-size:12px;color:#334155;margin-bottom:8px;font-weight:700;">What happens:</div>
+            <div style="font-size:12px;color:#64748B;line-height:1.8;">
+              1. Everything in Expert Review<br/>
+              2. <strong style="color:#334155;">Our AI plays DOJ investigator</strong> — challenges every control claim with the questions a real investigator would ask<br/>
+              3. You receive a False Claims Risk Report<br/>
+              4. You fix any flagged gaps before signing<br/>
+              5. Annual recertification included
+            </div>
+            <div style="margin:14px 0;border-top:1px solid #DDD6FE;padding-top:12px;">
+              <div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:6px;">Included:</div>
+              <div style="font-size:12px;color:#64748B;line-height:1.9;">
+                ✓ Everything in Expert Review<br/>
+                ✓ AI Red Team — DOJ investigator challenges all 110 controls<br/>
+                ✓ False Claims Risk Report before signing<br/>
+                ✓ All security policy templates<br/>
+                ✓ Annual recertification (keeps your score current)<br/>
+                ✓ Priority 48hr turnaround
+              </div>
+            </div>
+            <div style="background:#F3E8FF;border:1px solid #DDD6FE;border-radius:6px;padding:8px;margin-bottom:14px;font-size:11px;color:#4C1D95;">
+              🛡️ <strong>Why this matters:</strong> The DOJ Civil Cyber-Fraud Initiative has collected $2.6B+ in settlements. An inaccurate SPRS score carries treble damages. The AI Red Team finds problems before the government does.
+            </div>
+            <button class="btn-pay" style="background:#5B21B6;" onclick="pay('defend_s')">Start Full Protection — $8,000/yr →</button>
           </div>
+
+        </div>
+
+        <div style="text-align:center;padding:16px;background:#F8FAFC;border-radius:10px;margin-bottom:16px;">
+          <div style="font-size:13px;color:#64748B;margin-bottom:6px;">Need the enterprise DEFEND tier?</div>
+          <button class="btn-back" onclick="pay('defend_p')" style="font-size:13px;">Enterprise DEFEND — $20,000/yr · Full managed service →</button>
+        </div>
+
+        <!-- NOT SURE WHICH TO CHOOSE -->
+        <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:16px;text-align:center;margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:4px;">🤔 Not sure which is right for you?</div>
+          <div style="font-size:12px;color:#64748B;margin-bottom:10px;">Most first-time CMMC submitters choose <strong>Expert Review ($3,500)</strong> — the peace of mind that a professional has reviewed your documentation before your Affirming Official puts their name on it is worth it.</div>
+          <a href="https://calendly.com/amrit-rapidscsolutions/free-cmmc-compliance-review" target="_blank" style="font-size:13px;font-weight:700;color:#0099CC;text-decoration:none;">Schedule a free 15-minute call to talk through your situation →</a>
         </div>
 
         <div style="text-align:center;padding:20px;background:#F7F9FC;border-radius:12px;margin-top:8px;">
@@ -881,7 +972,7 @@ async function submitCertify() {
     `Your SSP for ${state.company.name} has been submitted. ${summary.implemented} controls implemented, ` +
     `${summary.partial} partial, ${summary.notImplemented} not yet implemented. ` +
     (summary.highRiskControls.length > 0 ? `${summary.highRiskControls.length} high-risk controls flagged by AI Red Team for review. ` : '') +
-    `Amrit Soni will review and respond within 2 business days.`;
+    `A ClearanceIQ compliance professional will review and respond within 2 business days.`;
 
   showScreen('screen-complete');
 }
@@ -964,7 +1055,7 @@ function pay(tier) {
   const url = STRIPE[tier];
   if (!url || url.includes('REPLACE')) {
     // Stripe not yet configured — capture via Formspree
-    const email = prompt('Enter your email — Amrit will contact you to complete payment:');
+    const email = prompt('Enter your email — our team will contact you to complete payment:');
     if (email && email.includes('@')) {
       const tierNames = {basic:'$999 Quick Start', certify:'$3,500 CERTIFY', premium:'$8,000 CERTIFY Premium', defend_s:'$8,000/yr DEFEND', defend_p:'$20,000/yr DEFEND Premium'};
       fetch('https://formspree.io/f/xwvgkjvk', {
@@ -979,7 +1070,7 @@ function pay(tier) {
           _replyto: email
         })
       }).catch(() => {});
-      alert('Got it! Amrit will email you at ' + email + ' within 2 hours to complete your ' + (tierNames[tier]||tier) + ' purchase.');
+      alert('Got it! Our team will email you at ' + email + ' within 2 hours to complete your ' + (tierNames[tier]||tier) + ' purchase.');
       submitCertify();
     }
   } else {
@@ -1066,7 +1157,7 @@ function buildSSPDoc() {
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">'
     + '<div><div style="font-size:11px;color:#64748B;margin-bottom:4px;">Affirming Official Signature</div><div style="height:48px;border-bottom:2px solid #CBD5E0;"></div><div style="font-size:10px;color:#94A3B8;margin-top:4px;">' + (c.contact||'[Name]') + ', ' + (c.role||'[Title]') + '</div></div>'
     + '<div><div style="font-size:11px;color:#64748B;margin-bottom:4px;">Date</div><div style="height:48px;border-bottom:2px solid #CBD5E0;"></div></div>'
-    + '<div><div style="font-size:11px;color:#0099CC;margin-bottom:4px;">Practitioner Review (ClearanceIQ)</div><div style="height:48px;border-bottom:2px solid #00C8F0;"></div><div style="font-size:10px;color:#94A3B8;margin-top:4px;">/Amrit Soni/ &mdash; Founder, ClearanceIQ</div></div>'
+    + '<div><div style="font-size:11px;color:#0099CC;margin-bottom:4px;">Practitioner Review (ClearanceIQ)</div><div style="height:48px;border-bottom:2px solid #00C8F0;"></div><div style="font-size:10px;color:#94A3B8;margin-top:4px;">/ClearanceIQ Review Team/ &mdash; ClearanceIQ Inc.</div></div>'
     + '<div><div style="font-size:11px;color:#0099CC;margin-bottom:4px;">Review Date</div><div style="height:48px;border-bottom:2px solid #00C8F0;"></div></div>'
     + '</div></div>'
     + '<div style="text-align:center;font-size:10px;color:#CBD5E0;margin-top:24px;padding-top:12px;border-top:1px solid #F0F4FA;">Generated by ClearanceIQ&trade; &middot; Patent Pending 64/110,963 &middot; 64/110,968 &middot; 64/111,830 &middot; ' + today + '</div>';
@@ -1404,7 +1495,7 @@ I understand that knowingly providing false information in this attestation may 
 <div>
 <div class="sig-line" style="border-color:#0099CC;"></div>
 <div style="font-size:11px;color:#0099CC;">Practitioner Review — ClearanceIQ</div>
-<div style="font-size:11px;margin-top:4px;">/Amrit Soni/ — Founder, ClearanceIQ Inc.</div>
+<div style="font-size:11px;margin-top:4px;">/ClearanceIQ Review Team/ — ClearanceIQ Inc.</div>
 </div>
 <div>
 <div class="sig-line" style="border-color:#0099CC;"></div>
