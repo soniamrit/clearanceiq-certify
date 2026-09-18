@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/redteam.js": {
-      "maxDuration": 30
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",
