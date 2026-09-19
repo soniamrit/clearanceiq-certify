@@ -812,7 +812,7 @@ async function runRedTeam(ctrlId, btn) {
 
   // Call the Netlify backend proxy — keeps API key secure
   try {
-    const response = await fetch('/.netlify/functions/redteam', {
+    const response = await fetch(AI_ENDPOINT, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
