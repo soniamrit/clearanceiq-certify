@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>ClearanceIQ CERTIFY — CMMC Self-Certification Workflow</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -66,6 +68,7 @@ nav{background:var(--navy);padding:0 24px;height:60px;display:flex;align-items:c
 .status-btn.sel-impl{background:var(--glt);border-color:var(--green);color:var(--green);}
 .status-btn.sel-part{background:var(--alt);border-color:var(--amber);color:var(--amber);}
 .status-btn.sel-none{background:var(--rlt);border-color:var(--red);color:var(--red);}
+.status-btn.sel-na{background:#F8FAFC;border-color:var(--slate);color:var(--slate);}
 .ctrl-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none;resize:vertical;min-height:60px;transition:border .15s;}
 .ctrl-input:focus{border-color:var(--cyan);}
 .ctrl-label{font-size:11px;font-weight:600;color:var(--slate);margin-bottom:4px;display:block;}
@@ -417,10 +420,39 @@ footer p{font-size:11px;color:#283848;}
         <div class="sum-box"><div class="sum-n" style="color:#F87171;" id="sn-none">0</div><div class="sum-l" style="color:#F87171;">Not Implemented</div></div>
         <div class="sum-box"><div class="sum-n" style="color:#93C5FD;" id="sn-nr">0</div><div class="sum-l" style="color:#93C5FD;">Not Reviewed</div></div>
       </div>
+      <!-- SPRS SCORE GAUGE -->
+      <div id="sprs-gauge-wrap" style="margin-bottom:24px;padding:20px;background:var(--navy);border-radius:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Your SPRS Score on the -203 to +110 Scale</div>
+        <div style="position:relative;height:56px;margin-bottom:12px;">
+          <div style="position:absolute;top:20px;left:0;right:0;height:18px;border-radius:9px;background:linear-gradient(90deg,#DC2626 0%,#DC2626 30%,#D97706 30%,#D97706 55%,#0369A1 55%,#0369A1 78%,#059669 78%,#059669 100%);"></div>
+          <div style="position:absolute;top:20px;left:0;right:0;height:18px;display:flex;pointer-events:none;border-radius:9px;overflow:hidden;">
+            <div style="flex:30%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.8);">CRITICAL</div>
+            <div style="flex:25%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.8);">HIGH</div>
+            <div style="flex:23%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.8);">MODERATE</div>
+            <div style="flex:22%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.8);">LOW RISK</div>
+          </div>
+          <div id="sprs-marker" style="position:absolute;top:0;left:50%;transition:left 1s cubic-bezier(.34,1.56,.64,1);transform:translateX(-50%);">
+            <div style="text-align:center;">
+              <div id="sprs-marker-score" style="font-size:14px;font-weight:900;font-family:'Barlow Condensed',sans-serif;color:white;background:#1E293B;padding:2px 8px;border-radius:4px;border:2px solid white;white-space:nowrap;display:inline-block;"></div>
+              <div style="width:2px;height:12px;background:white;margin:0 auto;"></div>
+              <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid white;margin:0 auto;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#607090;padding:0 2px;">
+          <span>-203 (min)</span>
+          <span>0</span>
+          <span>+88 (conditional)</span>
+          <span>+110 (max)</span>
+        </div>
+        <div id="sprs-callout" style="margin-top:14px;border-radius:8px;padding:12px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;"></div>
+      </div>
       <div id="ssp-body"></div>
     </div>
     <div class="btn-row">
       <button class="btn-back" onclick="goToDomain(DOMAINS.length-1)">← Edit Controls</button>
+      <button onclick="downloadCSV()" style="padding:12px 16px;background:rgba(5,150,105,.1);color:#059669;border:2px solid rgba(5,150,105,.3);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">⬇ CSV</button>
+      <button onclick="downloadExcel()" style="padding:12px 16px;background:rgba(5,150,105,.1);color:#059669;border:2px solid rgba(5,150,105,.3);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">⬇ Excel</button>
       <button class="btn-primary" onclick="showScreen('screen-payment')" style="margin-right:10px;">Get My Documents & Submit →</button>
       <button class="btn-back" onclick="generateSubmissionPackage()" style="background:linear-gradient(135deg,#059669,#047857);color:white;border:none;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">📊 Preview My Score (Free)</button>
     </div>
@@ -469,6 +501,7 @@ footer p{font-size:11px;color:#283848;}
   <p>ClearanceIQ™ CERTIFY · ClearanceIQ Inc. · Patent Pending · Not affiliated with the US DoD</p>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script>
 // ── CONFIGURATION ───────────────────────────────────────────────────────────
@@ -733,13 +766,13 @@ function renderDomainControls(di) {
       <div class="control-id">NIST SP 800-171 · ${ctrl.id}</div>
       <div class="control-req">${ctrl.req}</div>
       <div class="status-row">
-        <button class="status-btn ${resp.status==='implemented'?'sel-impl':''}"
-          onclick="setStatus('${ctrl.id}','implemented',${di})">✓ Implemented</button>
-        <button class="status-btn ${resp.status==='partial'?'sel-part':''}"
-          onclick="setStatus('${ctrl.id}','partial',${di})">⚡ Partial</button>
-        <button class="status-btn ${resp.status==='not-implemented'?'sel-none':''}"
-          onclick="setStatus('${ctrl.id}','not-implemented',${di})">✗ Not Implemented</button>
-        <button class="status-btn ${resp.status==='not-applicable'?'sel-na':''}"
+        <button class="status-btn ${resp.status==='implemented'?'sel-impl':''}" data-status="implemented"
+          onclick="setStatus('${ctrl.id}','implemented',${di});updateButtonHighlights('${ctrl.id}','implemented')">✓ Implemented</button>
+        <button class="status-btn ${resp.status==='partial'?'sel-part':''}" data-status="partial"
+          onclick="setStatus('${ctrl.id}','partial',${di});updateButtonHighlights('${ctrl.id}','partial')">⚡ Partial</button>
+        <button class="status-btn ${resp.status==='not-implemented'?'sel-none':''}" data-status="not-implemented"
+          onclick="setStatus('${ctrl.id}','not-implemented',${di});updateButtonHighlights('${ctrl.id}','not-implemented')">✗ Not Implemented</button>
+        <button class="status-btn ${resp.status==='not-applicable'?'sel-na':''}" data-status="not-applicable"
           onclick="setStatus('${ctrl.id}','not-applicable',${di})" style="background:${resp.status==='not-applicable'?'#64748B':'transparent'};color:${resp.status==='not-applicable'?'white':'#64748B'};border-color:#64748B;">N/A</button>
       </div>
       ${resp.status==='not-applicable' ? `
@@ -918,6 +951,43 @@ function showSSP() {
     sprsEl.textContent = sprsResult.score + '/110';
     sprsEl.style.color = sprsResult.score >= 88 ? '#4ADE80' : sprsResult.score >= 0 ? '#FCD34D' : '#F87171';
   }
+  // Animate SPRS gauge
+  const gScore = sprsResult.score;
+  const markerEl = document.getElementById('sprs-marker');
+  const markerScore = document.getElementById('sprs-marker-score');
+  const callout = document.getElementById('sprs-callout');
+  if(markerEl && markerScore) {
+    markerScore.textContent = gScore + '/110';
+    // Position: (score + 203) / 313 * 100%
+    const pct = Math.max(0, Math.min(100, (gScore + 203) / 313 * 100));
+    // Small delay for animation
+    setTimeout(() => { markerEl.style.left = pct + '%'; }, 300);
+    // Color and callout based on zone
+    let color, bg, msg, icon;
+    if(gScore < -100) {
+      color='#F87171'; bg='rgba(220,38,38,.1)';
+      icon='🚨'; msg='Critical Risk — Significant gaps across multiple domains. Immediate remediation required before SPRS submission.';
+    } else if(gScore < 0) {
+      color='#FCD34D'; bg='rgba(217,119,6,.1)';
+      icon='⚠️'; msg='High Risk — Several critical gaps identified. A structured 60-90 day remediation plan is needed.';
+    } else if(gScore < 88) {
+      color='#93C5FD'; bg='rgba(3,105,161,.1)';
+      icon='📋'; msg='Moderate Risk — Solid foundation with targeted gaps. Focused remediation will achieve conditional compliance.';
+    } else {
+      color='#4ADE80'; bg='rgba(5,150,105,.1)';
+      icon='✓'; msg='Low Risk — Strong posture. Complete your POA&M and submit to SPRS.';
+    }
+    markerEl.querySelector('div > div:first-child').style.borderColor = color;
+    markerEl.querySelector('div > div:first-child').style.color = color;
+    markerEl.querySelectorAll('div > div')[1].style.background = color;
+    markerEl.querySelector('div > div:last-child').style.borderTopColor = color;
+    if(callout) {
+      callout.style.background = bg;
+      callout.style.border = '1px solid ' + color + '33';
+      callout.innerHTML = '<span style="font-size:18px;">' + icon + '</span><span style="color:' + color + ';">' + gScore + '</span><span style="color:#8AA0B8;font-weight:500;">' + msg + '</span>';
+    }
+  }
+
   if (sprsResult.ssp_missing) {
     const warn = document.getElementById('ssp-gate-warning');
     if (warn) warn.style.display = 'block';
@@ -936,12 +1006,10 @@ function showSSP() {
         const pointsDisplay = s==='implemented'||s==='not-applicable' ? '<span style="color:#4ADE80;font-size:10px;">+0 pts</span>' :
           s==='partial' ? `<span style="color:#FCD34D;font-size:10px;">-${getControlWeight(ctrl.id,'partial')} pts</span>` :
           sprsPoints > 0 ? `<span style="color:#F87171;font-size:10px;">-${sprsPoints} pts</span>` : '';
-        const rtRisk = resp.rtResult?.risk;
         return `<div class="ssp-control-row">
           <div class="ssp-control-id">${ctrl.id}</div>
           <div class="ssp-control-status">
             <span class="ssp-status-chip ${chipClass}">${chipText}</span>
-            ${rtRisk?`<span class="risk-badge ${rtRisk==='HIGH'?'risk-high':rtRisk==='LOW'?'risk-low':'risk-med'}" style="margin-left:0;margin-top:3px;display:block;">RT:${rtRisk}</span>`:''}
           </div>
           <div class="ssp-control-text">
             ${ctrl.req}
@@ -1373,6 +1441,7 @@ function generateSubmissionPackage(paid) {
   // Admin demo: requires private key — hash verified, not stored in plain text
   const _ak = paid && btoa(paid) === 'Q1FkZW1vLUlRLTIwMjY=';
   const isPaid = PaymentGuard.check() || _ak;
+  window.__demoMode = _ak;
   if (!isPaid) {
     showFreePreview();
     return;
@@ -1446,7 +1515,7 @@ td{padding:6px 10px;border-bottom:1px solid #E2E8F0;font-size:11px;vertical-alig
 @media print{.no-print{display:none;}}
 </style></head><body>
 
-<div class="no-print" style="background:#0099CC;color:white;padding:12px;border-radius:6px;margin-bottom:20px;">
+<div class="no-print" style="background:#0099CC;color:white;padding:12px;border-radius:6px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
 <strong>CMMC Level 2 SPRS Submission Package</strong> — Click File → Print → Save as PDF to download all documents.
 <button onclick="window.print()" style="float:right;background:white;color:#0099CC;border:none;padding:6px 16px;border-radius:4px;font-weight:bold;cursor:pointer;">⬇ Save as PDF</button>
 </div>
@@ -1485,7 +1554,7 @@ td{padding:6px 10px;border-bottom:1px solid #E2E8F0;font-size:11px;vertical-alig
 <tr><td>⚡ Partial</td><td>${part}</td><td>Full or partial deduction per DoD methodology</td></tr>
 <tr><td>✗ Not Implemented</td><td>${none}</td><td>Full point deduction applied</td></tr>
 <tr><td>N/A (Justified)</td><td>${na}</td><td>No deduction — treated as Met per §170.24</td></tr>
-<tr style="font-weight:bold;"><td>Total Controls</td><td>${impl+part+none+na}</td><td><strong>SPRS Score: ${sprsScore}/110</strong></td></tr>
+<tr style="font-weight:bold;"><td>Total Controls</td><td>110</td><td><strong>SPRS Score: ${sprsScore}/110</strong></td></tr>
 </table>
 
 ${result.ssp_missing ? '<div class="warn">⚠ WARNING: System Security Plan (3.12.4) is not marked as Implemented. Under 32 CFR 170.24, a current SSP is a prerequisite — without it, the assessment cannot be completed. Implement 3.12.4 before submitting to SPRS.</div>' : ''}
@@ -1498,6 +1567,9 @@ This score is self-attested. False attestation carries False Claims Act liabilit
 
 <!-- DOCUMENT 2: POA&M -->
 <div class="page-break"></div>
+<div style="background:#070F1E;color:#00C8F0;padding:12px 16px;border-radius:8px;margin:32px 0 16px;font-size:13px;font-weight:700;letter-spacing:1px;border-left:4px solid #00C8F0;">
+  ─── DOCUMENT 2 OF 4 ───────────────────────────────
+</div>
 <h2>Document 2 of 4 — Plan of Action & Milestones (POA&M)</h2>
 <p style="font-size:11px;color:#64748B;margin-bottom:12px;">
 Organization: ${c.name||'[Name]'} · CAGE: ${c.cage||'[CAGE]'} · Date: ${today}
@@ -1529,6 +1601,9 @@ ${gaps.map((id, i) => {
 
 <!-- DOCUMENT 3: SSP SUMMARY -->
 <div class="page-break"></div>
+<div style="background:#070F1E;color:#00C8F0;padding:12px 16px;border-radius:8px;margin:32px 0 16px;font-size:13px;font-weight:700;letter-spacing:1px;border-left:4px solid #00C8F0;">
+  ─── DOCUMENT 3 OF 4 ───────────────────────────────
+</div>
 <h2>Document 3 of 4 — System Security Plan (SSP) Summary</h2>
 <p style="font-size:11px;color:#64748B;margin-bottom:12px;">
 This is a summary SSP. Organizations must maintain a full SSP per NIST SP 800-171 control 3.12.4. This document establishes the SSP record for SPRS submission purposes.
@@ -1555,6 +1630,9 @@ ${typeof DOMAINS !== 'undefined' ? DOMAINS.map(d => {
 
 <!-- DOCUMENT 4: AFFIRMING OFFICIAL LETTER -->
 <div class="page-break"></div>
+<div style="background:#070F1E;color:#00C8F0;padding:12px 16px;border-radius:8px;margin:32px 0 16px;font-size:13px;font-weight:700;letter-spacing:1px;border-left:4px solid #00C8F0;">
+  ─── DOCUMENT 4 OF 4 ───────────────────────────────
+</div>
 <h2>Document 4 of 4 — Affirming Official Attestation Letter</h2>
 
 <div style="border:2px solid #D97706;border-radius:6px;padding:16px;margin-bottom:16px;background:#FFFBEB;">
@@ -1617,15 +1695,15 @@ Generated by ClearanceIQ™ · ClearanceIQ Inc. · Patent Pending 64/110,963 · 
   // Inject watermark for unpaid/console-hacked sessions
   setTimeout(function() {
     try {
-      if (PaymentGuard.check()) {
+      if (PaymentGuard.check() || window.__demoMode) {
         var banner = pkgWindow.document.createElement('div');
         banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#059669;color:white;padding:10px;text-align:center;font-size:13px;font-weight:700;font-family:Arial,sans-serif;z-index:99999;';
         banner.textContent = 'Verified ClearanceIQ Document - Ready for Affirming Official Signature';
         pkgWindow.document.body.appendChild(banner);
       } else {
         var wm = pkgWindow.document.createElement('div');
-        wm.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:52px;font-weight:900;color:rgba(220,38,38,0.15);white-space:nowrap;font-family:Arial,sans-serif;letter-spacing:4px;pointer-events:none;z-index:99999;user-select:none;';
-        wm.textContent = 'SAMPLE ONLY - NOT FOR SPRS SUBMISSION';
+        wm.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:99999;';
+        wm.innerHTML = '<div style="transform:rotate(-35deg);font-size:40px;font-weight:900;color:rgba(220,38,38,0.12);white-space:nowrap;font-family:Arial,sans-serif;letter-spacing:3px;text-align:center;user-select:none;">SAMPLE ONLY<br/>NOT FOR SPRS SUBMISSION</div>';
         pkgWindow.document.body.appendChild(wm);
         var warning = pkgWindow.document.createElement('div');
         warning.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#DC2626;color:white;padding:10px;text-align:center;font-size:13px;font-weight:700;font-family:Arial,sans-serif;z-index:99999;';
@@ -1925,6 +2003,205 @@ const PaymentGuard = (function() {
     }
   };
 })();
+
+
+// ── EXPORT FUNCTIONS ─────────────────────────────────────────────
+
+function buildExportData() {
+  const today = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const rows = [];
+
+  // Header row
+  rows.push([
+    'Domain','Control ID','Requirement','Status',
+    'Implementation Description','Evidence Reference',
+    'SPRS Weight','Point Impact','Target Date','Assessment Date'
+  ]);
+
+  DOMAINS.forEach(domain => {
+    domain.controls.forEach(ctrl => {
+      const resp = getResp(ctrl.id);
+      const status = resp.status || 'not-reviewed';
+      const w = SPRS_WEIGHTS[ctrl.id] || 1;
+
+      // Calculate point impact
+      let impact = '';
+      if(status === 'implemented' || status === 'not-applicable') {
+        impact = '0 (no deduction)';
+      } else if(status === 'partial') {
+        impact = `-${Math.ceil(w/2)} (partial deduction)`;
+      } else if(status === 'not-implemented') {
+        impact = `-${w} (full deduction)`;
+      } else {
+        impact = 'Not reviewed';
+      }
+
+      // Target date for POA&M items
+      let targetDate = '';
+      if(status === 'partial' || status === 'not-implemented') {
+        const t = new Date();
+        t.setDate(t.getDate() + (w >= 5 ? 90 : w >= 3 ? 120 : 180));
+        targetDate = t.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      }
+
+      // Status label
+      const statusLabel = {
+        'implemented': 'Implemented',
+        'partial': 'Partial',
+        'not-implemented': 'Not Implemented',
+        'not-applicable': 'N/A',
+        'not-reviewed': 'Not Reviewed'
+      }[status] || status;
+
+      rows.push([
+        `${domain.id} — ${domain.name}`,
+        ctrl.id,
+        ctrl.req,
+        statusLabel,
+        resp.description || '',
+        resp.evidence || '',
+        w,
+        impact,
+        targetDate,
+        today
+      ]);
+    });
+  });
+
+  return rows;
+}
+
+function downloadCSV() {
+  const rows = buildExportData();
+  const csv = rows.map(row =>
+    row.map(cell => {
+      const str = String(cell || '').replace(/"/g, '""');
+      return str.includes(',') || str.includes('"') || str.includes('\n')
+        ? `"${str}"` : str;
+    }).join(',')
+  ).join('\n');
+
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const co = (state.company.name||'ClearanceIQ').replace(/[^a-zA-Z0-9]/g,'_');
+  a.download = `ClearanceIQ_${co}_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadExcel() {
+  if(typeof XLSX === 'undefined') {
+    alert('Excel export is loading — please try again in a moment.');
+    return;
+  }
+
+  const rows = buildExportData();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:28},{wch:12},{wch:60},{wch:18},
+    {wch:45},{wch:30},{wch:12},{wch:20},{wch:14},{wch:14}
+  ];
+
+  // Style header row (bold, navy background)
+  const headerRange = XLSX.utils.decode_range(ws['!ref']);
+  for(let C = headerRange.s.c; C <= headerRange.e.c; C++) {
+    const addr = XLSX.utils.encode_cell({r:0, c:C});
+    if(!ws[addr]) continue;
+    ws[addr].s = {
+      font:{bold:true,color:{rgb:'FFFFFF'}},
+      fill:{fgColor:{rgb:'070F1E'}},
+      alignment:{wrapText:true}
+    };
+  }
+
+  // Color code status rows
+  for(let R = 1; R <= headerRange.e.r; R++) {
+    const statusCell = ws[XLSX.utils.encode_cell({r:R, c:3})];
+    if(!statusCell) continue;
+    let fillColor = 'FFFFFF';
+    if(statusCell.v === 'Implemented') fillColor = 'ECFDF5';
+    else if(statusCell.v === 'Partial') fillColor = 'FFFBEB';
+    else if(statusCell.v === 'Not Implemented') fillColor = 'FEF2F2';
+    else if(statusCell.v === 'N/A') fillColor = 'F8FAFC';
+
+    // Apply to whole row
+    for(let C = 0; C <= headerRange.e.c; C++) {
+      const addr = XLSX.utils.encode_cell({r:R, c:C});
+      if(!ws[addr]) ws[addr] = {v:''};
+      ws[addr].s = {fill:{fgColor:{rgb:fillColor}},alignment:{wrapText:true}};
+    }
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'CMMC Assessment');
+
+  // Add summary sheet
+  const sprsResult = calculateSPRSAccurate();
+  const summaryData = [
+    ['ClearanceIQ™ CMMC Level 2 Assessment Summary',''],
+    ['',''],
+    ['Company', state.company.name || ''],
+    ['CAGE Code', state.company.cage || ''],
+    ['Assessment Date', new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})],
+    ['',''],
+    ['SPRS Score', sprsResult.score],
+    ['Score Range', '-203 to +110'],
+    ['',''],
+    ['Implemented Controls', DOMAINS.flatMap(d=>d.controls).filter(c=>getResp(c.id).status==='implemented').length],
+    ['Partial Controls', DOMAINS.flatMap(d=>d.controls).filter(c=>getResp(c.id).status==='partial').length],
+    ['Not Implemented', DOMAINS.flatMap(d=>d.controls).filter(c=>getResp(c.id).status==='not-implemented').length],
+    ['Not Applicable', DOMAINS.flatMap(d=>d.controls).filter(c=>getResp(c.id).status==='not-applicable').length],
+    ['Total Controls', 110],
+    ['',''],
+    ['Generated by', 'ClearanceIQ™ — clearanceiq.io'],
+    ['Patent Pending', '64/110,963 · 64/110,968 · 64/111,830'],
+  ];
+
+  const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+  wsSummary['!cols'] = [{wch:25},{wch:40}];
+  XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+
+  const co = (state.company.name||'ClearanceIQ').replace(/[^a-zA-Z0-9]/g,'_');
+  XLSX.writeFile(wb, `ClearanceIQ_${co}_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+
+// ── BUTTON HIGHLIGHT HELPER — bulletproof, no re-render needed ──
+function updateButtonHighlights(ctrlId, newStatus) {
+  const idSafe = ctrlId.replace(/\./g,'_');
+  const btnMap = {
+    'implemented':    'sel-impl',
+    'partial':        'sel-part',
+    'not-implemented':'sel-none',
+    'not-applicable': 'sel-na'
+  };
+  const allClasses = Object.values(btnMap);
+
+  // Find all status buttons for this control
+  const card = document.getElementById('card-' + idSafe);
+  if (!card) return;
+  const btns = card.querySelectorAll('.status-btn');
+
+  btns.forEach(btn => {
+    // Remove ALL selection classes first
+    allClasses.forEach(cls => btn.classList.remove(cls));
+    // Add the correct class only to the matching button
+    const btnStatus = btn.getAttribute('data-status');
+    if (btnStatus && btnStatus === newStatus && btnMap[newStatus]) {
+      btn.classList.add(btnMap[newStatus]);
+    }
+  });
+
+  // Update card border
+  const card2 = document.getElementById('card-' + idSafe);
+  if (card2) {
+    card2.className = 'control-card ' + (newStatus || '');
+  }
+}
 
 </script>
 </body>
