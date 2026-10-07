@@ -506,6 +506,91 @@ footer p{font-size:11px;color:#283848;}
 <script>
 // ── CONFIGURATION ───────────────────────────────────────────────────────────
 const FORMSPREE_CERTIFY = 'xwvgkjvk';
+// ── BETA / TESTIMONIAL ACCESS CODES ──────────────────────────
+// Each code is base64-encoded so plaintext doesn't appear in source.
+// Generate new codes: btoa('CQ-BETA-YOURNAME')
+// Deactivate: remove the hash from this array.
+const BETA_CODES = [
+  'Q1EtQkVUQS1BTFZBUkVa',    // CQ-BETA-ALVAREZ
+  'Q1EtQkVUQS1FR0dFUlQ=',    // CQ-BETA-EGGERT
+  'Q1EtQkVUQS1ORUdWRVNLWQ==',// CQ-BETA-NEGVESKY
+  'Q1EtQkVUQS1NQU5BTEFORw==',// CQ-BETA-MANALANG
+  'Q1EtQkVUQS1GQVJJRE5JQQ==',// CQ-BETA-FARIDNIA
+  'Q1EtQkVUQS1TQU5UQQ==',    // CQ-BETA-SANTA
+  'Q1EtQkVUQS1TSEFSTUE=',    // CQ-BETA-SHARMA
+  'Q1EtQkVUQS1DSElDQUdP',    // CQ-BETA-CHICAGO
+  'Q1EtQkVUQS1NQUNISU5JTkcx',// CQ-BETA-MACHINING1
+  'Q1EtQkVUQS1NQUNISU5JTkcy' // CQ-BETA-MACHINING2
+];
+
+function checkPromoCode(val) {
+  const msg = document.getElementById('promo-msg');
+  if (!msg) return;
+  if (!val) { msg.textContent = ''; return; }
+  if (isBetaCode(val)) {
+    msg.innerHTML = '<span style="color:#059669;font-weight:700;">✓ Valid beta code — documents will be unlocked at no charge</span>';
+  } else {
+    msg.innerHTML = '<span style="color:#94A3B8;">Enter your assigned beta code exactly as provided</span>';
+  }
+}
+
+function isBetaCode(code) {
+  if (!code) return false;
+  const encoded = btoa(code.toUpperCase().trim());
+  return BETA_CODES.includes(encoded);
+}
+
+function redeemBetaCode(tier, tierLabel) {
+  const code = document.getElementById('pf-promo')?.value || '';
+  if (!isBetaCode(code)) return false;
+
+  const name    = document.getElementById('pf-name')?.value    || 'Beta User';
+  const email   = document.getElementById('pf-email')?.value   || '';
+  const company = document.getElementById('pf-company')?.value || '';
+  const sprsResult = calculateSPRSAccurate();
+
+  // Notify you that a beta code was used
+  fetch('https://formspree.io/f/xwvgkjvk', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      type: 'BETA_CODE_REDEEMED',
+      code: code.toUpperCase().trim(),
+      tier: tierLabel,
+      name, email, company,
+      sprs_score: sprsResult.score,
+      _subject: '🎁 Beta Code Used: ' + code.toUpperCase().trim() + ' — ' + company,
+      _replyto: email
+    })
+  }).catch(() => {});
+
+  // Unlock documents — same as a paid session
+  PaymentGuard.confirm();
+  const inner = document.querySelector('.pay-inner');
+  if (!inner) return true;
+  inner.innerHTML = `
+    <div style="max-width:520px;margin:0 auto;padding:40px 0;text-align:center;">
+      <div style="font-size:64px;margin-bottom:16px;">🎁</div>
+      <h2 style="font-size:32px;font-weight:900;color:#070F1E;font-family:'Barlow Condensed',sans-serif;margin-bottom:8px;">
+        Beta Access Granted
+      </h2>
+      <p style="font-size:16px;color:#64748B;margin-bottom:24px;">
+        Welcome, <strong>${name}</strong>. Your complimentary access to ClearanceIQ CERTIFY is active.
+        In exchange, we'd love a quick testimonial after you review your documents.
+      </p>
+      <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:20px;margin-bottom:24px;text-align:left;">
+        <div style="font-size:13px;font-weight:700;color:#15803D;margin-bottom:8px;">✓ All documents unlocked</div>
+        <div style="font-size:12px;color:#374151;">SPRS Score Worksheet · POA&M · SSP · Attestation Letter</div>
+      </div>
+      <button onclick="generateSubmissionPackage()" 
+        style="width:100%;padding:16px;background:#059669;color:white;border:none;border-radius:10px;font-size:17px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">
+        Generate My Documents Now →
+      </button>
+    </div>
+  `;
+  return true;
+}
+
 // ── STRIPE PAYMENT LINKS ─────────────────────────────
 // Create these at dashboard.stripe.com → Payment Links → Create link
 // Then paste the URLs below
@@ -1129,6 +1214,15 @@ function showPaymentForm(tier, tierLabel) {
             placeholder="+1 (949) 000-0000"/>
         </div>
 
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px;font-weight:600;color:#64748B;display:block;margin-bottom:6px;">Promo / Beta Code (optional)</label>
+          <input id="pf-promo" type="text" placeholder="e.g. CQ-BETA-XXXXX"
+            style="width:100%;padding:12px;border:2px solid #E2E8F0;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:1px;box-sizing:border-box;"
+            oninput="this.value=this.value.toUpperCase();checkPromoCode(this.value)"
+            onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#E2E8F0'"/>
+          <div id="promo-msg" style="font-size:11px;margin-top:4px;min-height:16px;"></div>
+        </div>
+
         <div style="background:#E0F7FD;border-radius:8px;padding:12px;margin-bottom:20px;font-size:12px;color:#0D4F6B;">
           ✓ No payment information collected here · Our team contacts you to process payment securely · Documents delivered within 2 business hours of payment
         </div>
@@ -1158,6 +1252,9 @@ function submitPaymentForm(tier, tierLabel) {
     fields.forEach(f => { if(!f.value) f.style.borderColor='#DC2626'; });
     return;
   }
+
+  // Check beta/promo code first — if valid, bypass payment entirely
+  if (redeemBetaCode(tier, tierLabel)) return;
 
   const btn = document.querySelector('.pay-inner button');
   if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
