@@ -449,11 +449,319 @@ footer p{font-size:11px;color:#283848;}
       </div>
       <div id="ssp-body"></div>
     </div>
+
+    <!-- ClearanceIQ Attestation Acknowledgment Component -->
+<style>
+  .ciq-attest-wrap {
+    background: rgba(0, 194, 203, 0.05);
+    border: 1px solid rgba(0, 194, 203, 0.22);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin: 32px 0 24px;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .ciq-attest-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .ciq-attest-header svg {
+    flex-shrink: 0;
+  }
+
+  .ciq-attest-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f0f4ff;
+    letter-spacing: -0.1px;
+  }
+
+  .ciq-attest-subtitle {
+    font-size: 12px;
+    color: #6a7a9a;
+    margin-top: 2px;
+  }
+
+  .ciq-attest-divider {
+    border: none;
+    border-top: 1px solid rgba(0, 194, 203, 0.12);
+    margin: 0 0 20px;
+  }
+
+  .ciq-attest-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .ciq-attest-item:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* Custom checkbox */
+  .ciq-attest-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid rgba(0, 194, 203, 0.4);
+    border-radius: 5px;
+    background: rgba(0, 194, 203, 0.06);
+    cursor: pointer;
+    margin-top: 1px;
+    position: relative;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .ciq-attest-item input[type="checkbox"]:checked {
+    background: #00c2cb;
+    border-color: #00c2cb;
+  }
+
+  .ciq-attest-item input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: 2px solid #06101e;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+  }
+
+  .ciq-attest-item input[type="checkbox"]:focus-visible {
+    outline: 2px solid #00c2cb;
+    outline-offset: 2px;
+  }
+
+  .ciq-attest-label {
+    font-size: 14px;
+    color: #c8d4e8;
+    line-height: 1.55;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ciq-attest-label a {
+    color: #00c2cb;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .ciq-attest-label a:hover {
+    text-decoration: underline;
+  }
+
+  .ciq-attest-label strong {
+    color: #f0f4ff;
+    font-weight: 600;
+  }
+
+  /* Warning shown when user tries to proceed without checking all boxes */
+  .ciq-attest-warning {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #fca5a5;
+  }
+
+  .ciq-attest-warning.ciq-visible {
+    display: flex;
+  }
+
+  /* Progress row */
+  .ciq-attest-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 194, 203, 0.12);
+  }
+
+  .ciq-progress-text {
+    font-size: 12px;
+    color: #4a5a7a;
+    letter-spacing: 0.04em;
+  }
+
+  .ciq-progress-text.ciq-complete {
+    color: #22c55e;
+  }
+
+  .ciq-progress-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .ciq-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0, 194, 203, 0.2);
+    transition: background 0.2s;
+  }
+
+  .ciq-dot.ciq-checked     { background: #00c2cb; }
+  .ciq-dot.ciq-all-checked { background: #22c55e; }
+</style>
+
+<!-- ═══════════════════════ COMPONENT HTML ═══════════════════════ -->
+<div class="ciq-attest-wrap" id="ciq-attestation-block">
+
+  <div class="ciq-attest-header">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 2L18.66 17H1.34L10 2Z" stroke="#f97316" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M10 8v4" stroke="#f97316" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="10" cy="14.5" r="0.8" fill="#f97316"/>
+    </svg>
+    <div>
+      <div class="ciq-attest-title">Required Attestation Acknowledgment</div>
+      <div class="ciq-attest-subtitle">You must confirm all three statements before downloading your package.</div>
+    </div>
+  </div>
+
+  <hr class="ciq-attest-divider">
+
+  <!-- Checkbox 1: Accuracy of implementations -->
+  <div class="ciq-attest-item">
+    <input type="checkbox" id="ciq-chk-1" onchange="ciqUpdateProgress()">
+    <label class="ciq-attest-label" for="ciq-chk-1">
+      <strong>I confirm the accuracy of my control implementations.</strong>
+      I understand that all information I have entered into ClearanceIQ reflects the actual cybersecurity practices of my organization.
+      ClearanceIQ cannot verify my implementations — I am solely responsible for the truthfulness of this attestation package.
+    </label>
+  </div>
+
+  <!-- Checkbox 2: False Claims Act -->
+  <div class="ciq-attest-item">
+    <input type="checkbox" id="ciq-chk-2" onchange="ciqUpdateProgress()">
+    <label class="ciq-attest-label" for="ciq-chk-2">
+      <strong>I understand my False Claims Act obligations.</strong>
+      I acknowledge that submitting false or inaccurate cybersecurity attestations to the Department of Defense may violate
+      the False Claims Act (31 U.S.C. §§ 3729–3733), which carries civil penalties up to three times contract value.
+      I have reviewed the
+      <a href="https://clearanceiq.io/legal.html#fca" target="_blank" rel="noopener">ClearanceIQ legal disclaimers</a>
+      and will seek qualified legal counsel if I have any doubts about my attestation.
+    </label>
+  </div>
+
+  <!-- Checkbox 3: C3PAO still required -->
+  <div class="ciq-attest-item">
+    <input type="checkbox" id="ciq-chk-3" onchange="ciqUpdateProgress()">
+    <label class="ciq-attest-label" for="ciq-chk-3">
+      <strong>I understand CMMC Level 2 certification requires a C3PAO assessment.</strong>
+      I acknowledge that ClearanceIQ prepares my documentation and attestation package but
+      <strong>does not itself certify</strong> my organization for CMMC Level 2.
+      Formal certification requires an independent assessment by a DoD-authorized
+      Certified Third-Party Assessment Organization (C3PAO) as required by 32 C.F.R. Part 170.
+    </label>
+  </div>
+
+  <!-- Warning banner (hidden until user tries to proceed without checking) -->
+  <div class="ciq-attest-warning" id="ciq-warn">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="7" stroke="#ef4444" stroke-width="1.4"/>
+      <path d="M8 5v3.5" stroke="#ef4444" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="8" cy="11" r="0.7" fill="#ef4444"/>
+    </svg>
+    Please confirm all three statements above before proceeding.
+  </div>
+
+  <!-- Progress indicator -->
+  <div class="ciq-attest-progress">
+    <span class="ciq-progress-text" id="ciq-progress-text">0 of 3 confirmed</span>
+    <div class="ciq-progress-dots">
+      <div class="ciq-dot" id="ciq-dot-1"></div>
+      <div class="ciq-dot" id="ciq-dot-2"></div>
+      <div class="ciq-dot" id="ciq-dot-3"></div>
+    </div>
+  </div>
+
+</div>
+<!-- ═══════════════════════ END COMPONENT ═══════════════════════ -->
+
+<script>
+(function () {
+
+  function allChecked() {
+    return (
+      document.getElementById('ciq-chk-1').checked &&
+      document.getElementById('ciq-chk-2').checked &&
+      document.getElementById('ciq-chk-3').checked
+    );
+  }
+
+  /* Called by each checkbox onchange */
+  window.ciqUpdateProgress = function () {
+    var checks = [
+      document.getElementById('ciq-chk-1').checked,
+      document.getElementById('ciq-chk-2').checked,
+      document.getElementById('ciq-chk-3').checked
+    ];
+    var count  = checks.filter(Boolean).length;
+    var done   = count === 3;
+
+    /* Update dots */
+    checks.forEach(function (checked, i) {
+      var dot = document.getElementById('ciq-dot-' + (i + 1));
+      dot.className = 'ciq-dot' + (checked ? (done ? ' ciq-all-checked' : ' ciq-checked') : '');
+    });
+
+    /* Update progress text */
+    var pt = document.getElementById('ciq-progress-text');
+    pt.textContent = count + ' of 3 confirmed';
+    pt.className   = 'ciq-progress-text' + (done ? ' ciq-complete' : '');
+
+    /* Hide warning once complete */
+    if (done) document.getElementById('ciq-warn').classList.remove('ciq-visible');
+
+    /* Lock / unlock every button tagged  data-ciq-submit */
+    document.querySelectorAll('[data-ciq-submit]').forEach(function (btn) {
+      btn.disabled           = !done;
+      btn.style.opacity      = done ? '' : '0.4';
+      btn.style.cursor       = done ? '' : 'not-allowed';
+    });
+  };
+
+  /* Intercept clicks on locked buttons and show warning */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-ciq-submit]');
+    if (btn && !allChecked()) {
+      e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('ciq-warn').classList.add('ciq-visible');
+      document.getElementById('ciq-attestation-block')
+              .scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, true);
+
+  /* Run once on load to set initial disabled state */
+  window.ciqUpdateProgress();
+
+}());
+</script>
+
     <div class="btn-row">
       <button class="btn-back" onclick="goToDomain(DOMAINS.length-1)">← Edit Controls</button>
       <button onclick="downloadCSV()" style="padding:12px 16px;background:rgba(5,150,105,.1);color:#059669;border:2px solid rgba(5,150,105,.3);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">⬇ CSV</button>
       <button onclick="downloadExcel()" style="padding:12px 16px;background:rgba(5,150,105,.1);color:#059669;border:2px solid rgba(5,150,105,.3);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">⬇ Excel</button>
-      <button class="btn-primary" onclick="showScreen('screen-payment')" style="margin-right:10px;">Get My Documents & Submit →</button>
+      <button class="btn-primary" onclick="showScreen('screen-payment')" style="margin-right:10px;" data-ciq-submit>Get My Documents & Submit →</button>
       <button class="btn-back" onclick="generateSubmissionPackage()" style="background:linear-gradient(135deg,#059669,#047857);color:white;border:none;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">📊 Preview My Score (Free)</button>
     </div>
   </div>
