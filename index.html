@@ -913,9 +913,12 @@ const STRIPE = {
 // Set ANTHROPIC_API_KEY in Netlify → Site settings → Environment variables
 // Then deploy netlify/functions/redteam.js (file created separately)
 // Works on both Netlify (/.netlify/functions/redteam) and Vercel (/api/redteam)
-const AI_ENDPOINT = window.location.hostname.includes('netlify') 
-  ? '/.netlify/functions/redteam' 
-  : '/api/redteam'; // backend proxy URL // reuse leads form — replace with dedicated form ID
+// FIX: check for Vercel (not Netlify) — custom domains like certify.clearanceiq.io
+// never contain 'netlify', so the original check always fell through to /api/redteam (Vercel).
+// Now: Vercel preview URLs → /api/redteam; everything else (Netlify + custom domain) → Netlify function.
+const AI_ENDPOINT = window.location.hostname.includes('vercel.app')
+  ? '/api/redteam'
+  : '/.netlify/functions/redteam'; // backend proxy URL
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 // NOTE FOR AKRATI: Add your Anthropic API key here or load from environment
 // For production, this call should be proxied through a backend to protect the API key
