@@ -162,6 +162,32 @@ nav{background:var(--navy);padding:0 24px;height:60px;display:flex;align-items:c
 footer{background:var(--navy);padding:20px 24px;text-align:center;margin-top:40px;}
 footer p{font-size:11px;color:#283848;}
 @media(max-width:600px){.tier-row,.form-grid,.summary-grid{grid-template-columns:1fr;}.domain-header{flex-direction:column;gap:10px;}}
+/* ── WELCOME BANNER ────────────────────────────────────────────────────────── */
+#assess-welcome{background:linear-gradient(135deg,#003A52 0%,#005A7A 100%);border:1px solid var(--cyan);border-radius:10px;padding:14px 18px;margin-bottom:20px;display:none;gap:14px;align-items:flex-start;}
+#assess-welcome.show{display:flex;}
+.welcome-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
+.welcome-title{font-size:14px;font-weight:700;color:var(--cyan);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;}
+.welcome-score{font-size:28px;font-weight:900;color:white;font-family:'Barlow Condensed',sans-serif;line-height:1;}
+.welcome-sub{font-size:12px;color:#A8D8E8;margin-top:4px;line-height:1.5;}
+/* ── CUI ADVISORY ───────────────────────────────────────────────────────────── */
+#cui-advisory{background:#FFFBEB;border:2px solid #FCD34D;border-radius:10px;padding:16px 18px;margin-bottom:20px;}
+#cui-advisory.acked{background:var(--glt);border-color:#A7F3D0;}
+.cui-adv-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.cui-adv-icon{font-size:18px;flex-shrink:0;}
+.cui-adv-title{font-size:14px;font-weight:700;color:#92400E;}
+#cui-advisory.acked .cui-adv-title{color:#065F46;}
+.cui-adv-rules{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-bottom:12px;}
+.cui-rule{font-size:11px;line-height:1.5;color:#374151;display:flex;gap:6px;}
+.cui-rule-icon{flex-shrink:0;font-size:11px;}
+.cui-ack-row{display:flex;align-items:flex-start;gap:10px;padding-top:10px;border-top:1px solid #FDE68A;}
+#cui-advisory.acked .cui-ack-row{border-top-color:#A7F3D0;}
+.cui-ack-row input[type=checkbox]{margin-top:3px;width:16px;height:16px;cursor:pointer;accent-color:var(--green);}
+.cui-ack-label{font-size:12px;color:#374151;line-height:1.6;cursor:pointer;}
+.cui-ack-label strong{color:#92400E;}
+#cui-advisory.acked .cui-ack-label strong{color:#065F46;}
+#cui-ack-badge{display:none;align-items:center;gap:8px;font-size:12px;color:#065F46;font-weight:600;}
+#cui-ack-badge.show{display:flex;}
+@media(max-width:600px){.cui-adv-rules{grid-template-columns:1fr;}}
 /* ── SCOPE WIZARD ──────────────────────────────────────────────────────────── */
 .scope-step-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:8px;}
 .scope-step-title{font-size:28px;font-weight:900;color:var(--navy);font-family:'Barlow Condensed',sans-serif;margin-bottom:4px;line-height:1.1;}
@@ -229,6 +255,16 @@ footer p{font-size:11px;color:#283848;}
   <!-- SCREEN: INTRO -->
   <div class="screen active" id="screen-intro">
     <div class="intro-card">
+      <!-- Welcome banner (shown when arriving from ASSESS via URL params) -->
+      <div id="assess-welcome">
+        <div class="welcome-icon">📊</div>
+        <div>
+          <div class="welcome-title">Your Quick-Scan Results</div>
+          <div class="welcome-score" id="welcome-score-val">—</div>
+          <div class="welcome-sub" id="welcome-score-sub">Gap identified from your free anonymous assessment — let's build your official SSP and POA&amp;M.</div>
+        </div>
+      </div>
+
       <div class="intro-icon">🛡️</div>
       <div class="intro-h">ClearanceIQ <em>CERTIFY</em></div>
       <div class="intro-sub">Guided CMMC Level 2 self-certification workflow. Complete your 110-control documentation, generate your SSP and POA&M, and receive an AI Red Team review before signing.</div>
@@ -245,6 +281,30 @@ footer p{font-size:11px;color:#283848;}
         <div class="tier-box">
           <div class="tier-name">Step 3 — Certify</div>
           <div class="tier-desc">Generate signed SSP + POA&M. Expert review included before SPRS submission</div>
+        </div>
+      </div>
+
+      <!-- CUI Data Advisory — mandatory before proceeding -->
+      <div id="cui-advisory">
+        <div class="cui-adv-head">
+          <div class="cui-adv-icon">⛔</div>
+          <div class="cui-adv-title">Data Input Restrictions — Read Before Starting</div>
+        </div>
+        <div id="cui-ack-badge">✅ CUI policy acknowledged on ClearanceIQ.io — you're clear to begin.</div>
+        <div id="cui-rules-wrap">
+          <div style="font-size:11px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">ClearanceIQ is NOT authorized to store, process, or transmit CUI</div>
+          <div class="cui-adv-rules">
+            <div class="cui-rule"><span class="cui-rule-icon">🚫</span><span><strong>Do NOT paste</strong> classified documents, CUI-marked files, or content from ITAR/EAR-controlled systems</span></div>
+            <div class="cui-rule"><span class="cui-rule-icon">🚫</span><span><strong>Do NOT enter</strong> real IP addresses, credentials, live network configs, or personnel records</span></div>
+            <div class="cui-rule"><span class="cui-rule-icon">🚫</span><span><strong>Do NOT describe</strong> the specific <em>contents</em> of CUI — describe your handling processes instead</span></div>
+            <div class="cui-rule"><span class="cui-rule-icon">✅</span><span><strong>DO enter</strong> descriptions of your security controls and processes (e.g. "CUI stored on VLAN-isolated servers")</span></div>
+          </div>
+          <div class="cui-ack-row">
+            <input type="checkbox" id="cui-ack-cb" onchange="cuiAckToggle(this)"/>
+            <label class="cui-ack-label" for="cui-ack-cb">
+              I understand that ClearanceIQ is <strong>not authorized to handle CUI</strong>. I will not enter Controlled Unclassified Information, classified data, or sensitive system details. My Affirming Official is responsible for reviewing all generated documents before submission.
+            </label>
+          </div>
         </div>
       </div>
 
@@ -279,7 +339,7 @@ footer p{font-size:11px;color:#283848;}
         </div>
       </div>
 
-      <button class="btn-primary" onclick="startCertify()" style="font-size:16px;padding:14px 36px;">
+      <button class="btn-primary" id="btn-begin-certify" onclick="startCertify()" style="font-size:16px;padding:14px 36px;opacity:.45;cursor:not-allowed;" disabled>
         Begin Certification Workflow →
       </button>
       <p style="font-size:12px;color:var(--slate);margin-top:10px;">Estimated time: 60–90 minutes · Assessment free · Documents from $999</p>
@@ -3009,6 +3069,71 @@ function updateButtonHighlights(ctrlId, newStatus) {
     card2.className = 'control-card ' + (newStatus || '');
   }
 }
+
+// ── CUI ACKNOWLEDGMENT & URL PARAM HANDLING ───────────────────────────────────
+function cuiAckToggle(cb) {
+  const btn = document.getElementById('btn-begin-certify');
+  const adv = document.getElementById('cui-advisory');
+  if(cb.checked) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+    adv.classList.add('acked');
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '.45';
+    btn.style.cursor = 'not-allowed';
+    adv.classList.remove('acked');
+  }
+}
+
+(function initFromURL() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const ack = params.get('ack');
+    const ref = params.get('ref');
+    const score = params.get('score');
+    const name = params.get('name');
+    const email = params.get('email');
+    const contact = params.get('contact');
+    const cage = params.get('cage');
+
+    // Pre-fill company form if passed via URL
+    if(name)    { const el=document.getElementById('co-name');    if(el) el.value=decodeURIComponent(name); }
+    if(email)   { const el=document.getElementById('co-email');   if(el) el.value=decodeURIComponent(email); }
+    if(contact) { const el=document.getElementById('co-contact'); if(el) el.value=decodeURIComponent(contact); }
+    if(cage)    { const el=document.getElementById('co-cage');    if(el) el.value=decodeURIComponent(cage); }
+
+    // If user already acknowledged CUI on clearanceiq.io (ack=1 in URL)
+    if(ack === '1') {
+      const cb = document.getElementById('cui-ack-cb');
+      const badge = document.getElementById('cui-ack-badge');
+      const rulesWrap = document.getElementById('cui-rules-wrap');
+      if(cb) { cb.checked = true; cuiAckToggle(cb); }
+      if(badge) badge.classList.add('show');
+      if(rulesWrap) rulesWrap.style.display = 'none';
+    }
+
+    // Show welcome banner if arriving from ASSESS (ref=assess or score param present)
+    if(ref === 'assess' || score) {
+      const banner = document.getElementById('assess-welcome');
+      const scoreVal = document.getElementById('welcome-score-val');
+      const scoreSub = document.getElementById('welcome-score-sub');
+      if(banner) banner.classList.add('show');
+      if(score && scoreVal) {
+        const s = parseInt(score, 10);
+        scoreVal.textContent = s + ' / 110';
+        scoreVal.style.color = s < 0 ? '#F87171' : s < 60 ? '#FBBF24' : '#34D399';
+        if(scoreSub) {
+          const gap = 110 - Math.max(0, s);
+          scoreSub.textContent = gap > 0
+            ? gap + ' points of gap identified in your free assessment — let\'s document your controls and build your official SSP.'
+            : 'Strong baseline score. Let\'s lock it in with a full documented SSP and POA&M.';
+        }
+      }
+    }
+  } catch(e) {}
+})();
 
 </script>
 </body>
