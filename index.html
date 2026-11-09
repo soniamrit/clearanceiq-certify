@@ -70,6 +70,25 @@ nav{background:var(--navy);padding:0 24px;height:60px;display:flex;align-items:c
 .env-note-onprem{background:#F0FDF4;border-color:#BBF7D0;color:#14532D;}
 .env-note-hybrid{background:#FFF7ED;border-color:#FED7AA;color:#9A3412;}
 .env-note-msp{background:var(--plt);border-color:#C4B5FD;color:#3730A3;}
+.adj-section-head{font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.adj-section-sub{font-size:12px;color:var(--slate);margin-bottom:10px;line-height:1.5;}
+.adj-card{background:#FAFBFF;border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;}
+.adj-cat-name{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;}
+.adj-status-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.adj-opt{flex:1;min-width:140px;display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;background:white;transition:border-color .15s,background .15s;}
+.adj-opt:hover{border-color:var(--cyan);}
+.adj-opt input[type=radio]{margin-top:2px;flex-shrink:0;}
+.adj-opt-title{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:2px;}
+.adj-opt-desc{font-size:11px;color:var(--slate);line-height:1.4;}
+.adj-opt.adj-sel-green{border-color:var(--green);background:var(--glt);}
+.adj-opt.adj-sel-amber{border-color:var(--amber);background:var(--alt);}
+.adj-opt.adj-sel-blue{border-color:#0369A1;background:#EFF6FF;}
+.adj-fields{display:grid;gap:10px;padding:12px;background:#F8FAFF;border:1px solid #BFDBFE;border-radius:8px;margin-top:4px;}
+.adj-fields label{font-size:10px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:3px;}
+.adj-fields input,.adj-fields select{width:100%;font-size:12px;padding:6px 9px;border:1px solid #CBD5E1;border-radius:6px;font-family:'Inter',sans-serif;background:white;box-sizing:border-box;}
+.adj-ack-box{padding:12px 14px;background:var(--alt);border:1.5px solid #FCD34D;border-radius:8px;margin-top:4px;font-size:12px;line-height:1.5;color:var(--navy);}
+.adj-ack-box label{display:flex;align-items:flex-start;gap:8px;cursor:pointer;}
+.adj-ack-box input[type=checkbox]{margin-top:2px;flex-shrink:0;}
 .status-row{display:flex;gap:8px;margin-bottom:12px;}
 .status-btn{padding:7px 14px;border-radius:8px;border:2px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;background:white;}
 .status-btn.sel-impl{background:var(--glt);border-color:var(--green);color:var(--green);}
@@ -447,6 +466,13 @@ footer p{font-size:11px;color:#283848;}
         <label class="cui-cb"><input type="checkbox" value="INFRA" onchange="cuiToggle(this)"><div class="cui-cb-name">Critical Infrastructure</div><div class="cui-cb-desc">Information about critical infrastructure vulnerabilities</div></label>
         <label class="cui-cb"><input type="checkbox" value="LEGAL" onchange="cuiToggle(this)"><div class="cui-cb-name">Legal / Attorney-Client</div><div class="cui-cb-desc">Legal proceedings, attorney work product</div></label>
         <label class="cui-cb"><input type="checkbox" value="OPSEC" onchange="cuiToggle(this)"><div class="cui-cb-name">Operations Security</div><div class="cui-cb-desc">Operational details, force protection, security programs</div></label>
+      </div>
+
+      <!-- CUI Adjudication Records — 32 CFR §2002.52(f) -->
+      <div id="cui-adj-section" style="display:none;margin-top:16px;">
+        <div class="adj-section-head">CUI Adjudication Records <span style="font-size:10px;font-weight:400;text-transform:none;color:var(--slate);">· 32 CFR §2002.52(f) &amp; §2002.14</span></div>
+        <div class="adj-section-sub">For each CUI category you identified, document its adjudication status. Per §2002.52(f), absent a formal determination, all DoD information must be treated as CUI.</div>
+        <div id="cui-adj-forms"></div>
       </div>
 
       <div style="font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;">External Service Provider (ESP)</div>
@@ -1390,7 +1416,7 @@ let state = {
   company: {},
   currentDomain: 0,
   responses: {}, // { controlId: { status, description, evidence, rtResult } }
-  scope: { sysName:'', infra:'', userCount:'', boundaryDesc:'', assets:[], cuiCategories:[], hasESP:'', esps:[], completed:false }
+  scope: { sysName:'', infra:'', userCount:'', boundaryDesc:'', assets:[], cuiCategories:[], cuiAdjudications:{}, hasESP:'', esps:[], completed:false }
 };
 
 function getResp(id) { return state.responses[id] || {}; }
@@ -1569,6 +1595,8 @@ function cuiToggle(el) {
     state.scope.cuiCategories = state.scope.cuiCategories.filter(v=>v!==val);
     cb.classList.remove('ck');
   }
+  renderCuiAdjudications();
+  autosave();
 }
 
 function espToggle(val) {
@@ -1608,6 +1636,114 @@ function espRemove(id) {
   renderEspList();
 }
 
+// ── CUI ADJUDICATION MODULE — 32 CFR §2002.52(f) ─────────────────────────────
+const CUI_LABELS = {
+  'CTI':'CTI — Controlled Technical Information', 'EXPT':'Export Controlled (ITAR/EAR)',
+  'PII':'Privacy (PII)', 'INTEL':'Intelligence', 'PROC':'Procurement / Acquisition',
+  'INFRA':'Critical Infrastructure', 'LEGAL':'Legal / Attorney-Client', 'OPSEC':'Operations Security'
+};
+const CUI_REG_REFS = {
+  'CTI':'DoD CUI Registry — Defense: Controlled Technical Information (32 C.F.R. §2002)',
+  'EXPT':'DoD CUI Registry — Export Controlled (ITAR 22 C.F.R. §120-130 / EAR 15 C.F.R. §730-774)',
+  'PII':'DoD CUI Registry — Privacy: General Personal Privacy (5 U.S.C. §552a)',
+  'INTEL':'DoD CUI Registry — Intelligence (50 U.S.C. §3024)',
+  'PROC':'DoD CUI Registry — Procurement and Acquisition (41 U.S.C. §4702)',
+  'INFRA':'DoD CUI Registry — Critical Infrastructure (42 U.S.C. §5195c)',
+  'LEGAL':'DoD CUI Registry — Legal: Attorney-Client Privilege',
+  'OPSEC':'DoD CUI Registry — Operations Security (E.O. 13526)'
+};
+
+function setAdj(cat, field, val) {
+  if(!state.scope.cuiAdjudications) state.scope.cuiAdjudications = {};
+  if(!state.scope.cuiAdjudications[cat]) state.scope.cuiAdjudications[cat] = {};
+  state.scope.cuiAdjudications[cat][field] = val;
+  if(field === 'status') renderAdjFields(cat);
+  autosave();
+}
+
+function renderAdjFields(cat) {
+  const adj = (state.scope.cuiAdjudications || {})[cat] || {};
+  const container = document.getElementById('adj-fields-' + cat);
+  if(!container) return;
+  const status = adj.status || '';
+  if(status === 'confirmed') {
+    // Formal adjudication — was determined to BE CUI
+    container.innerHTML = `<div class="adj-fields">
+      <div><label>Adjudicated By (Name / Title)</label><input value="${escHtml(adj.adjBy||'')}" placeholder="e.g. CUI Program Manager, Jane Smith" oninput="setAdj('${cat}','adjBy',this.value)"/></div>
+      <div><label>Adjudication Date</label><input type="date" value="${escHtml(adj.adjDate||'')}" oninput="setAdj('${cat}','adjDate',this.value)"/></div>
+      <div><label>Registry Reference</label><input value="${escHtml(adj.regRef||CUI_REG_REFS[cat]||'')}" placeholder="CUI Registry Category Reference" oninput="setAdj('${cat}','regRef',this.value)"/></div>
+    </div>`;
+  } else if(status === 'not-cui') {
+    // Formally adjudicated NOT CUI — requires documented rationale
+    container.innerHTML = `<div class="adj-fields" style="background:#FEF2F2;border-color:#FECACA;">
+      <div><label>Adjudicated By (Name / Title)</label><input value="${escHtml(adj.adjBy||'')}" placeholder="e.g. Contracts Officer, John Doe" oninput="setAdj('${cat}','adjBy',this.value)"/></div>
+      <div><label>Adjudication Date</label><input type="date" value="${escHtml(adj.adjDate||'')}" oninput="setAdj('${cat}','adjDate',this.value)"/></div>
+      <div><label>Rationale (required — 32 CFR §2002.14)</label><input value="${escHtml(adj.rationale||'')}" placeholder="Formal basis for non-CUI determination" oninput="setAdj('${cat}','rationale',this.value)"/></div>
+    </div>`;
+  } else if(status === 'pending') {
+    // Pending adjudication — treat as CUI per §2002.52(f)
+    container.innerHTML = `<div class="adj-ack-box">
+      <label><input type="checkbox" ${adj.ack ? 'checked' : ''} onchange="setAdj('${cat}','ack',this.checked)">
+      <span>I acknowledge that per 32 CFR §2002.52(f), this information will be treated as CUI until formal adjudication is completed. I will document the adjudication outcome in the POA&amp;M.</span></label>
+    </div>`;
+  } else {
+    container.innerHTML = '';
+  }
+  // Update card border highlight
+  const card = document.getElementById('adj-card-' + cat);
+  if(card) {
+    card.classList.remove('adj-sel-green','adj-sel-amber','adj-sel-blue');
+    // Update radio button visual styling on the option buttons
+    ['confirmed','not-cui','pending'].forEach(s => {
+      const btn = document.getElementById('adj-opt-' + cat + '-' + s);
+      if(btn) {
+        btn.classList.remove('adj-sel-green','adj-sel-amber','adj-sel-blue');
+        if(s === status) {
+          if(s==='confirmed') btn.classList.add('adj-sel-green');
+          else if(s==='not-cui') btn.classList.add('adj-sel-amber');
+          else btn.classList.add('adj-sel-blue');
+        }
+      }
+    });
+  }
+}
+
+function renderCuiAdjudications() {
+  const cats = state.scope.cuiCategories || [];
+  const section = document.getElementById('cui-adj-section');
+  const forms = document.getElementById('cui-adj-forms');
+  if(!section || !forms) return;
+  if(cats.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  if(!state.scope.cuiAdjudications) state.scope.cuiAdjudications = {};
+  forms.innerHTML = cats.map(cat => {
+    const adj = state.scope.cuiAdjudications[cat] || {};
+    const s = adj.status || '';
+    return `<div class="adj-card" id="adj-card-${cat}">
+      <div class="adj-cat-name">${escHtml(CUI_LABELS[cat]||cat)}</div>
+      <div class="adj-status-row">
+        <label class="adj-opt${s==='confirmed'?' adj-sel-green':''}" id="adj-opt-${cat}-confirmed">
+          <input type="radio" name="adj-${cat}" value="confirmed" ${s==='confirmed'?'checked':''} onchange="setAdj('${cat}','status','confirmed')">
+          <div><div class="adj-opt-title">✓ Confirmed CUI</div><div class="adj-opt-desc">Formally adjudicated as CUI per DoD Registry</div></div>
+        </label>
+        <label class="adj-opt${s==='not-cui'?' adj-sel-amber':''}" id="adj-opt-${cat}-not-cui">
+          <input type="radio" name="adj-${cat}" value="not-cui" ${s==='not-cui'?'checked':''} onchange="setAdj('${cat}','status','not-cui')">
+          <div><div class="adj-opt-title">✗ Not CUI</div><div class="adj-opt-desc">Formally adjudicated — not CUI (document rationale)</div></div>
+        </label>
+        <label class="adj-opt${s==='pending'?' adj-sel-blue':''}" id="adj-opt-${cat}-pending">
+          <input type="radio" name="adj-${cat}" value="pending" ${s==='pending'?'checked':''} onchange="setAdj('${cat}','status','pending')">
+          <div><div class="adj-opt-title">⏳ Pending</div><div class="adj-opt-desc">Adjudication in progress — treat as CUI</div></div>
+        </label>
+      </div>
+      <div id="adj-fields-${cat}"></div>
+    </div>`;
+  }).join('');
+  // Restore field sections for already-set adjudications
+  cats.forEach(cat => {
+    if((state.scope.cuiAdjudications[cat]||{}).status) renderAdjFields(cat);
+  });
+}
+
 function scopeStep2Next() {
   if(state.scope.assets.length === 0) {
     alert('Please add at least one asset to classify before continuing.');
@@ -1625,6 +1761,8 @@ function scopeStep2Next() {
     cb.checked = isChecked;
     cb.closest('.cui-cb').classList.toggle('ck', isChecked);
   });
+  // Restore adjudication section if resuming
+  renderCuiAdjudications();
   // Restore ESP state if resuming
   if(state.scope.hasESP) {
     espToggle(state.scope.hasESP);
@@ -1635,6 +1773,27 @@ function scopeStep2Next() {
 function completeScopeAndBegin() {
   if(state.scope.cuiCategories.length === 0) {
     if(!confirm('No CUI categories selected. Continue anyway?')) return;
+  }
+  // Validate adjudication records per 32 CFR §2002.52(f)
+  if(state.scope.cuiCategories.length > 0) {
+    const adj = state.scope.cuiAdjudications || {};
+    const unadjudicated = state.scope.cuiCategories.filter(cat => !adj[cat] || !adj[cat].status);
+    if(unadjudicated.length > 0) {
+      const names = unadjudicated.map(c=>CUI_LABELS[c]||c).join(', ');
+      if(!confirm('Adjudication status not set for: ' + names + '.\n\nPer 32 CFR §2002.52(f), absent a formal determination these will be treated as CUI. Continue anyway?')) return;
+    }
+    // Warn on pending adjudications without acknowledgment
+    const unacked = state.scope.cuiCategories.filter(cat => adj[cat]?.status==='pending' && !adj[cat]?.ack);
+    if(unacked.length > 0) {
+      const names = unacked.map(c=>CUI_LABELS[c]||c).join(', ');
+      if(!confirm('Pending adjudication acknowledgment missing for: ' + names + '. Please check the acknowledgment or continue.')) return;
+    }
+    // Warn on not-cui determinations missing rationale
+    const noRationale = state.scope.cuiCategories.filter(cat => adj[cat]?.status==='not-cui' && !adj[cat]?.rationale);
+    if(noRationale.length > 0) {
+      const names = noRationale.map(c=>CUI_LABELS[c]||c).join(', ');
+      if(!confirm('Non-CUI determination rationale missing for: ' + names + '. Per 32 CFR §2002.14, rationale must be documented. Continue anyway?')) return;
+    }
   }
   if(state.scope.hasESP === 'yes') {
     const unauthorized = state.scope.esps.filter(e=>e.status==='none'||e.status==='');
@@ -2274,10 +2433,26 @@ function buildSSPDoc() {
     }
 
     if(state.scope.cuiCategories && state.scope.cuiCategories.length > 0) {
-      const cuiLabels = {'CTI':'CTI — Controlled Technical Information','EXPT':'Export Controlled (ITAR/EAR)','PII':'Privacy (PII)','INTEL':'Intelligence','PROC':'Procurement / Acquisition','INFRA':'Critical Infrastructure','LEGAL':'Legal / Attorney-Client','OPSEC':'Operations Security'};
-      html += '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:4px;">CUI Categories Present</div><div style="font-size:12px;color:#0D1B2A;">'
-        + state.scope.cuiCategories.map(v=>'<span style="display:inline-block;background:#E0F7FD;border:1px solid #00C8F0;border-radius:4px;padding:2px 7px;margin:2px;font-size:11px;font-weight:600;">' + (cuiLabels[v]||v) + '</span>').join('')
-        + '</div></div>';
+      const adjData = state.scope.cuiAdjudications || {};
+      const statusLabels = {'confirmed':'Confirmed CUI','not-cui':'Not CUI (Adjudicated)','pending':'Pending Adjudication'};
+      const statusColors = {'confirmed':'#059669','not-cui':'#D97706','pending':'#0369A1'};
+      html += '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:6px;">CUI Categories &amp; Adjudication Records <span style="font-size:9px;font-weight:400;text-transform:none;color:#94A3B8;">· 32 CFR §2002.52(f)</span></div>'
+        + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+        + '<tr style="background:#E0F7FD;"><th style="padding:5px 8px;text-align:left;font-weight:700;">CUI Category</th><th style="padding:5px 8px;text-align:left;font-weight:700;">Adjudication Status</th><th style="padding:5px 8px;text-align:left;font-weight:700;">Adjudicated By</th><th style="padding:5px 8px;text-align:left;font-weight:700;">Date</th><th style="padding:5px 8px;text-align:left;font-weight:700;">Registry Reference</th></tr>'
+        + state.scope.cuiCategories.map((v,i) => {
+          const a = adjData[v] || {};
+          const statusColor = statusColors[a.status] || '#DC2626';
+          const statusLabel = statusLabels[a.status] || 'Not Adjudicated — Treat as CUI';
+          const regRef = a.regRef || (window.CUI_REG_REFS && window.CUI_REG_REFS[v]) || (typeof CUI_REG_REFS !== 'undefined' ? CUI_REG_REFS[v] : '') || '—';
+          return '<tr style="background:' + (i%2===0?'#FAFBFF':'white') + ';">'
+            + '<td style="padding:5px 8px;border-top:1px solid #E2E8F0;font-weight:600;">' + (CUI_LABELS[v]||v) + '</td>'
+            + '<td style="padding:5px 8px;border-top:1px solid #E2E8F0;color:' + statusColor + ';font-weight:600;">' + statusLabel + '</td>'
+            + '<td style="padding:5px 8px;border-top:1px solid #E2E8F0;">' + (a.adjBy||'—') + '</td>'
+            + '<td style="padding:5px 8px;border-top:1px solid #E2E8F0;">' + (a.adjDate||'—') + '</td>'
+            + '<td style="padding:5px 8px;border-top:1px solid #E2E8F0;color:#64748B;font-size:10px;">' + regRef + '</td>'
+            + '</tr>';
+        }).join('')
+        + '</table></div>';
     }
 
     if(state.scope.hasESP === 'yes' && state.scope.esps && state.scope.esps.length > 0) {
