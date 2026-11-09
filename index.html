@@ -162,6 +162,47 @@ nav{background:var(--navy);padding:0 24px;height:60px;display:flex;align-items:c
 footer{background:var(--navy);padding:20px 24px;text-align:center;margin-top:40px;}
 footer p{font-size:11px;color:#283848;}
 @media(max-width:600px){.tier-row,.form-grid,.summary-grid{grid-template-columns:1fr;}.domain-header{flex-direction:column;gap:10px;}}
+/* ── SCOPE WIZARD ──────────────────────────────────────────────────────────── */
+.scope-step-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:8px;}
+.scope-step-title{font-size:28px;font-weight:900;color:var(--navy);font-family:'Barlow Condensed',sans-serif;margin-bottom:4px;line-height:1.1;}
+.scope-step-sub{font-size:14px;color:var(--slate);margin-bottom:20px;line-height:1.6;max-width:640px;}
+.cfr-note{background:var(--clt);border:1px solid rgba(0,200,240,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:#0D4F6B;margin-bottom:18px;line-height:1.6;}
+.cfr-note code{font-weight:700;font-size:11px;color:#0077A8;}
+.rcard-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.rcard{position:relative;border:2px solid var(--border);border-radius:8px;padding:12px 14px 12px 40px;cursor:pointer;background:white;transition:border-color .15s;}
+.rcard:hover{border-color:var(--cyan);}
+.rcard.sel{border-color:var(--cyan);background:var(--clt);}
+.rcard input[type="radio"]{position:absolute;left:12px;top:50%;transform:translateY(-50%);}
+.rcard-title{font-size:13px;font-weight:700;color:var(--navy);}
+.rcard-desc{font-size:11px;color:var(--slate);margin-top:2px;}
+.t4-legend{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;}
+.t4-item{background:white;border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:11px;line-height:1.5;}
+.t4-name{font-size:12px;font-weight:700;margin-bottom:2px;}
+.t4-cui{color:var(--red);} .t4-spa{color:#0077A8;} .t4-crm{color:var(--amber);} .t4-spc{color:var(--purple);} .t4-oos{color:var(--slate);}
+.scope-asset-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.scope-asset-row{background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.scope-asset-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #F0F4FA;}
+.scope-asset-num{font-size:11px;font-weight:700;color:var(--slate);flex-shrink:0;font-family:monospace;}
+.scope-asset-name{flex:1;min-width:0;border:none;border-bottom:1px solid var(--border);padding:2px 4px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;outline:none;background:transparent;}
+.scope-asset-name:focus{border-bottom-color:var(--cyan);}
+.scope-asset-del{background:none;border:none;cursor:pointer;color:var(--slate);font-size:14px;padding:2px 6px;border-radius:4px;line-height:1;}
+.scope-asset-del:hover{color:var(--red);background:var(--rlt);}
+.scope-asset-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;}
+.cui-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px;}
+.cui-cb{position:relative;border:1.5px solid var(--border);border-radius:7px;padding:9px 12px 9px 36px;cursor:pointer;background:white;transition:border-color .15s;}
+.cui-cb:hover{border-color:var(--cyan);}
+.cui-cb.ck{border-color:var(--cyan);background:var(--clt);}
+.cui-cb input[type="checkbox"]{position:absolute;left:11px;top:50%;transform:translateY(-50%);}
+.cui-cb-name{font-size:12px;font-weight:700;color:var(--navy);}
+.cui-cb-desc{font-size:10px;color:var(--slate);}
+.scope-flag{border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:12px;line-height:1.6;display:flex;gap:10px;align-items:flex-start;}
+.scope-flag-warn{background:var(--alt);border:1px solid #FCD34D;}
+.scope-flag-crit{background:var(--rlt);border:1px solid #FCA5A5;}
+.scope-flag-ok{background:var(--glt);border:1px solid #A7F3D0;}
+.scope-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px 14px;border:2px dashed var(--border);border-radius:8px;background:transparent;color:var(--slate);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
+.scope-add-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.scope-esp-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;}
+@media(max-width:600px){.rcard-wrap,.t4-legend,.scope-asset-fields,.cui-grid,.scope-esp-fields{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -247,6 +288,115 @@ footer p{font-size:11px;color:#283848;}
           style="background:transparent;color:var(--cyan);border:2px solid var(--cyan);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
           📂 Load Saved Progress
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCOPE WIZARD SCREENS ─────────────────────────────────────────────────── -->
+  <div id="screen-scope-1" class="screen" style="display:none;">
+    <div class="intro-card" style="max-width:720px;margin:0 auto;">
+      <div class="scope-step-label">Step 1 of 3 · 32 CFR Part 170</div>
+      <div class="scope-step-title">System Identification</div>
+      <p class="scope-step-sub">Define the information system boundary that will be assessed for CMMC compliance. This determines which assets fall under the 110-control scope.</p>
+      <div class="cfr-note"><code>32 CFR §170.19(b)</code> — The assessment scope is the set of assets that process, store, or transmit CUI, plus assets that provide security protections for those systems.</div>
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>System / Environment Name *</label>
+          <input class="form-input" id="scope-sysname" placeholder="e.g. CUI Processing Environment, Engineering Network"/>
+        </div>
+        <div class="form-group">
+          <label>Infrastructure Type *</label>
+          <select class="form-input" id="scope-infra">
+            <option value="">— Select —</option>
+            <option value="on-prem">On-Premises (company-owned hardware)</option>
+            <option value="cloud">Cloud-Hosted (IaaS/PaaS/SaaS)</option>
+            <option value="hybrid">Hybrid (on-prem + cloud)</option>
+            <option value="gfe">Government-Furnished Equipment (GFE)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Approximate User Count</label>
+          <select class="form-input" id="scope-usercount">
+            <option value="">— Select —</option>
+            <option value="1-10">1–10 users</option>
+            <option value="11-50">11–50 users</option>
+            <option value="51-250">51–250 users</option>
+            <option value="250+">250+ users</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>System Boundary Description *</label>
+          <textarea class="ctrl-input" id="scope-boundary" rows="3" placeholder="Describe what systems, networks, and facilities are inside the assessment boundary (e.g. engineering workstations, shared file server, VPN, cloud storage for design files)…"></textarea>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="showScreen('screen-intro')">← Back</button>
+        <button class="btn-next" onclick="scopeStep1Next()">Continue: Asset Classification →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-scope-2" class="screen" style="display:none;">
+    <div class="intro-card" style="max-width:760px;margin:0 auto;">
+      <div class="scope-step-label">Step 2 of 3 · 32 CFR Part 170 Table 4</div>
+      <div class="scope-step-title">Asset Classification</div>
+      <p class="scope-step-sub">Classify your in-scope assets per Table 4 of 32 CFR Part 170. This determines the full CMMC control scope for each asset type.</p>
+      <div class="cfr-note"><code>32 CFR §170.19(c)(2)(i)</code> — Asset categories define which NIST SP 800-171 controls apply. CUI Assets and Security Protection Assets carry the full 110-control requirement.</div>
+
+      <div class="t4-legend">
+        <div class="t4-item"><div class="t4-name t4-cui">● CUI Asset</div>Processes, stores, or transmits Controlled Unclassified Information directly. Full 110-control scope.</div>
+        <div class="t4-item"><div class="t4-name t4-spa">● Security Protection Asset (SPA)</div>Provides security functions for CUI Assets (firewalls, IAM, SIEM). Full 110-control scope.</div>
+        <div class="t4-item"><div class="t4-name t4-crm">● Contractor Risk Managed (CRMA)</div>Connected to CUI environment but not directly handling CUI. Contractor-defined controls.</div>
+        <div class="t4-item"><div class="t4-name t4-spc">● Specialized Asset</div>GFE, IoT, OT/ICS, test equipment. May have tailored requirements per asset type.</div>
+        <div class="t4-item"><div class="t4-name t4-oos">● Out of Scope</div>No connection to CUI environment. No CMMC requirements.</div>
+      </div>
+
+      <div id="scope-asset-list-wrap" class="scope-asset-list"></div>
+      <button class="scope-add-btn" onclick="scopeAddAsset()">+ Add Asset / Asset Group</button>
+
+      <div id="scope-flags" style="margin-top:14px;"></div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn-back" onclick="showScreen('screen-scope-1')">← Back</button>
+        <button class="btn-next" onclick="scopeStep2Next()">Continue: CUI Categories →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-scope-3" class="screen" style="display:none;">
+    <div class="intro-card" style="max-width:720px;margin:0 auto;">
+      <div class="scope-step-label">Step 3 of 3 · 32 CFR Part 2002</div>
+      <div class="scope-step-title">CUI Categories &amp; ESP Review</div>
+      <p class="scope-step-sub">Identify the CUI categories present in your system and confirm whether any External Service Providers (ESP) touch your CUI environment.</p>
+      <div class="cfr-note"><code>32 CFR §2002.52(f)</code> — All information must be treated as CUI unless formally adjudicated otherwise. CUI categories determine marking, handling, and destruction requirements.</div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">CUI Categories Present <span style="font-weight:400;color:var(--slate);font-size:11px;">(select all that apply)</span></div>
+      <div class="cui-grid" id="cui-grid">
+        <label class="cui-cb"><input type="checkbox" value="CTI" onchange="cuiToggle(this)"><div class="cui-cb-name">CTI — Controlled Technical Information</div><div class="cui-cb-desc">Technical data, engineering drawings, specs for defense systems</div></label>
+        <label class="cui-cb"><input type="checkbox" value="EXPT" onchange="cuiToggle(this)"><div class="cui-cb-name">EXPT — Export Controlled</div><div class="cui-cb-desc">ITAR, EAR, or other export-controlled technology</div></label>
+        <label class="cui-cb"><input type="checkbox" value="PII" onchange="cuiToggle(this)"><div class="cui-cb-name">PII — Privacy</div><div class="cui-cb-desc">Personally Identifiable Information of employees or others</div></label>
+        <label class="cui-cb"><input type="checkbox" value="INTEL" onchange="cuiToggle(this)"><div class="cui-cb-name">Intelligence</div><div class="cui-cb-desc">Intelligence information related to national security</div></label>
+        <label class="cui-cb"><input type="checkbox" value="PROC" onchange="cuiToggle(this)"><div class="cui-cb-name">Procurement / Acquisition</div><div class="cui-cb-desc">Source selection, pricing, bid/proposal information</div></label>
+        <label class="cui-cb"><input type="checkbox" value="INFRA" onchange="cuiToggle(this)"><div class="cui-cb-name">Critical Infrastructure</div><div class="cui-cb-desc">Information about critical infrastructure vulnerabilities</div></label>
+        <label class="cui-cb"><input type="checkbox" value="LEGAL" onchange="cuiToggle(this)"><div class="cui-cb-name">Legal / Attorney-Client</div><div class="cui-cb-desc">Legal proceedings, attorney work product</div></label>
+        <label class="cui-cb"><input type="checkbox" value="OPSEC" onchange="cuiToggle(this)"><div class="cui-cb-name">Operations Security</div><div class="cui-cb-desc">Operational details, force protection, security programs</div></label>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;">External Service Provider (ESP)</div>
+      <div class="rcard-wrap">
+        <label class="rcard" id="esp-no-card" onclick="espToggle('no')"><input type="radio" name="esp" value="no"> <div class="rcard-title">No ESP</div><div class="rcard-desc">All CUI processing is on company-owned or government-furnished systems</div></label>
+        <label class="rcard" id="esp-yes-card" onclick="espToggle('yes')"><input type="radio" name="esp" value="yes"> <div class="rcard-title">Yes — we use a cloud/MSP/SaaS</div><div class="rcard-desc">A third-party provider touches, processes, or stores CUI</div></label>
+      </div>
+      <div id="esp-detail" style="display:none;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;background:#FAFBFF;">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">ESP Details <span style="font-weight:400;color:var(--slate);">(list each provider)</span></div>
+        <div id="esp-list"></div>
+        <button class="scope-add-btn" style="margin-top:8px;" onclick="espAddRow()">+ Add ESP</button>
+        <div class="scope-flag scope-flag-crit" style="margin-top:12px;">⚠️ <strong>CMMC requirement:</strong> Any ESP that processes, stores, or transmits CUI must be CMMC-certified or FedRAMP Moderate Authorized per 32 CFR §170.19(c)(2)(iv).</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="showScreen('screen-scope-2')">← Back</button>
+        <button class="btn-next" style="background:var(--green);" onclick="completeScopeAndBegin()">✓ Confirm Scope &amp; Begin Assessment →</button>
       </div>
     </div>
   </div>
@@ -1026,6 +1176,7 @@ let state = {
   company: {},
   currentDomain: 0,
   responses: {}, // { controlId: { status, description, evidence, rtResult } }
+  scope: { sysName:'', infra:'', userCount:'', boundaryDesc:'', assets:[], cuiCategories:[], hasESP:'', esps:[], completed:false }
 };
 
 function getResp(id) { return state.responses[id] || {}; }
@@ -1081,6 +1232,204 @@ function startCertify() {
     date: new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
   };
   document.getElementById('progress-wrap').style.display = 'block';
+  showScopeWizard();
+}
+
+// ── SCOPE WIZARD ─────────────────────────────────────────────────────────────
+function showScopeWizard() {
+  showScreen('screen-scope-1');
+  if(state.scope.sysName) document.getElementById('scope-sysname').value = state.scope.sysName;
+  if(state.scope.infra) document.getElementById('scope-infra').value = state.scope.infra;
+  if(state.scope.userCount) document.getElementById('scope-usercount').value = state.scope.userCount;
+  if(state.scope.boundaryDesc) document.getElementById('scope-boundary').value = state.scope.boundaryDesc;
+}
+
+function scopeStep1Next() {
+  const sysName = document.getElementById('scope-sysname').value.trim();
+  const infra = document.getElementById('scope-infra').value;
+  const boundaryDesc = document.getElementById('scope-boundary').value.trim();
+  if(!sysName || !infra || !boundaryDesc) {
+    alert('Please fill in System Name, Infrastructure Type, and Boundary Description.');
+    return;
+  }
+  state.scope.sysName = sysName;
+  state.scope.infra = infra;
+  state.scope.userCount = document.getElementById('scope-usercount').value;
+  state.scope.boundaryDesc = boundaryDesc;
+  autosave();
+  renderAssetList();
+  showScreen('screen-scope-2');
+}
+
+let assetCount = 0;
+function scopeAddAsset() {
+  assetCount++;
+  const id = 'asset-' + assetCount;
+  state.scope.assets.push({ id, name:'', category:'', notes:'' });
+  renderAssetList();
+}
+
+function scopeRemoveAsset(id) {
+  state.scope.assets = state.scope.assets.filter(a=>a.id!==id);
+  renderAssetList();
+}
+
+function renderAssetList() {
+  const wrap = document.getElementById('scope-asset-list-wrap');
+  if(!wrap) return;
+  if(state.scope.assets.length === 0) {
+    wrap.innerHTML = '<div style="text-align:center;padding:20px;color:var(--slate);font-size:13px;">No assets added yet. Click "+ Add Asset" to begin classifying your in-scope systems.</div>';
+    return;
+  }
+  wrap.innerHTML = state.scope.assets.map((a,i) => `
+    <div class="scope-asset-row" id="arow-${a.id}">
+      <div class="scope-asset-head">
+        <span class="scope-asset-num">#${i+1}</span>
+        <input class="scope-asset-name" id="aname-${a.id}" value="${escHtml(a.name)}" placeholder="Asset name (e.g. Engineering Workstations, SharePoint)" oninput="assetFieldUpdate('${a.id}','name',this.value)"/>
+        <button class="scope-asset-del" onclick="scopeRemoveAsset('${a.id}')" title="Remove">✕</button>
+      </div>
+      <div class="scope-asset-fields">
+        <div class="form-group" style="margin:0;">
+          <label style="font-size:10px;">Table 4 Category *</label>
+          <select class="form-input" style="font-size:12px;" onchange="assetFieldUpdate('${a.id}','category',this.value)">
+            <option value="">— Select —</option>
+            <option value="CUI" ${a.category==='CUI'?'selected':''}>CUI Asset (full 110-ctrl scope)</option>
+            <option value="SPA" ${a.category==='SPA'?'selected':''}>Security Protection Asset</option>
+            <option value="CRMA" ${a.category==='CRMA'?'selected':''}>Contractor Risk Managed</option>
+            <option value="GFE" ${a.category==='GFE'?'selected':''}>Specialized — GFE</option>
+            <option value="IoT" ${a.category==='IoT'?'selected':''}>Specialized — IoT</option>
+            <option value="OT" ${a.category==='OT'?'selected':''}>Specialized — OT/ICS</option>
+            <option value="OOS" ${a.category==='OOS'?'selected':''}>Out of Scope</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label style="font-size:10px;">Notes / Examples</label>
+          <input class="form-input" style="font-size:12px;" value="${escHtml(a.notes)}" placeholder="e.g. 3 workstations, Windows 11" oninput="assetFieldUpdate('${a.id}','notes',this.value)"/>
+        </div>
+      </div>
+    </div>`).join('');
+  renderScopeFlags();
+}
+
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function assetFieldUpdate(id, field, val) {
+  const a = state.scope.assets.find(x=>x.id===id);
+  if(a) a[field] = val;
+  if(field==='category') renderScopeFlags();
+}
+
+function renderScopeFlags() {
+  const flags = document.getElementById('scope-flags');
+  if(!flags) return;
+  const html = [];
+  const hasCUI = state.scope.assets.some(a=>a.category==='CUI');
+  const hasSPA = state.scope.assets.some(a=>a.category==='SPA');
+  const hasGFE = state.scope.assets.some(a=>a.category==='GFE');
+  const hasOT = state.scope.assets.some(a=>a.category==='OT'||a.category==='IoT');
+  if(!hasCUI && state.scope.assets.length>0) {
+    html.push('<div class="scope-flag scope-flag-warn">⚠️ <div><strong>No CUI Assets identified.</strong> Per 32 CFR §2002.52(f), all DoD-related information must be treated as CUI unless formally adjudicated otherwise. If your work involves DoD contracts, classify at least one asset as a CUI Asset.</div></div>');
+  }
+  if(hasCUI && !hasSPA) {
+    html.push('<div class="scope-flag scope-flag-warn">ℹ️ <div><strong>No Security Protection Assets.</strong> Systems providing security functions (firewall, IAM, endpoint protection) for CUI Assets should be classified as Security Protection Assets — they carry the same 110-control scope.</div></div>');
+  }
+  if(hasGFE) {
+    html.push('<div class="scope-flag scope-flag-warn">🏛️ <div><strong>GFE identified.</strong> Government-Furnished Equipment is managed per your contract terms. CMMC requirements may be tailored — verify with your Contracting Officer.</div></div>');
+  }
+  if(hasOT) {
+    html.push('<div class="scope-flag scope-flag-warn">⚙️ <div><strong>OT/IoT identified.</strong> Operational Technology and IoT devices have specialized assessment approaches. Coordinate with your CMMC assessor for tailored requirements per 32 CFR §170.19(c)(2)(iii).</div></div>');
+  }
+  if(hasCUI) {
+    html.push('<div class="scope-flag scope-flag-ok">✓ <div><strong>CUI Assets confirmed.</strong> The full 110-control NIST SP 800-171 Rev 2 assessment will apply to these assets and their Security Protection Assets.</div></div>');
+  }
+  flags.innerHTML = html.join('');
+}
+
+function cuiToggle(el) {
+  const val = el.value;
+  const cb = el.closest('.cui-cb');
+  if(el.checked) {
+    if(!state.scope.cuiCategories.includes(val)) state.scope.cuiCategories.push(val);
+    cb.classList.add('ck');
+  } else {
+    state.scope.cuiCategories = state.scope.cuiCategories.filter(v=>v!==val);
+    cb.classList.remove('ck');
+  }
+}
+
+function espToggle(val) {
+  state.scope.hasESP = val;
+  document.getElementById('esp-no-card').classList.toggle('sel', val==='no');
+  document.getElementById('esp-yes-card').classList.toggle('sel', val==='yes');
+  document.getElementById('esp-detail').style.display = val==='yes'?'block':'none';
+  if(val==='yes' && state.scope.esps.length===0) espAddRow();
+}
+
+let espCount = 0;
+function espAddRow() {
+  espCount++;
+  const id = 'esp-'+espCount;
+  state.scope.esps.push({id, name:'', type:'', status:''});
+  renderEspList();
+}
+
+function renderEspList() {
+  const wrap = document.getElementById('esp-list');
+  if(!wrap) return;
+  wrap.innerHTML = state.scope.esps.map((e,i) => `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:8px;">
+      <div class="form-group" style="margin:0;"><label style="font-size:10px;">Provider Name</label><input class="form-input" style="font-size:12px;" value="${escHtml(e.name)}" placeholder="e.g. Microsoft 365" oninput="espFieldUpdate('${e.id}','name',this.value)"/></div>
+      <div class="form-group" style="margin:0;"><label style="font-size:10px;">Type</label><select class="form-input" style="font-size:12px;" onchange="espFieldUpdate('${e.id}','type',this.value)"><option value="">—</option><option value="SaaS" ${e.type==='SaaS'?'selected':''}>SaaS</option><option value="IaaS" ${e.type==='IaaS'?'selected':''}>IaaS</option><option value="PaaS" ${e.type==='PaaS'?'selected':''}>PaaS</option><option value="MSP" ${e.type==='MSP'?'selected':''}>MSP/MSSP</option></select></div>
+      <div class="form-group" style="margin:0;"><label style="font-size:10px;">Auth Status</label><select class="form-input" style="font-size:12px;" onchange="espFieldUpdate('${e.id}','status',this.value)"><option value="">— Unknown —</option><option value="fedramp" ${e.status==='fedramp'?'selected':''}>FedRAMP Moderate ✓</option><option value="cmmc" ${e.status==='cmmc'?'selected':''}>CMMC Certified ✓</option><option value="pending" ${e.status==='pending'?'selected':''}>Authorization Pending</option><option value="none" ${e.status==='none'?'selected':''}>Not Authorized ⚠</option></select></div>
+      <button class="scope-asset-del" onclick="espRemove('${e.id}')" style="margin-bottom:4px;" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+function espFieldUpdate(id, field, val) {
+  const e = state.scope.esps.find(x=>x.id===id);
+  if(e) e[field] = val;
+}
+function espRemove(id) {
+  state.scope.esps = state.scope.esps.filter(e=>e.id!==id);
+  renderEspList();
+}
+
+function scopeStep2Next() {
+  if(state.scope.assets.length === 0) {
+    alert('Please add at least one asset to classify before continuing.');
+    return;
+  }
+  const uncat = state.scope.assets.filter(a=>!a.category);
+  if(uncat.length > 0) {
+    alert('Please select a Table 4 category for all assets before continuing.');
+    return;
+  }
+  autosave();
+  // Restore CUI checkboxes if resuming
+  document.querySelectorAll('#cui-grid input[type=checkbox]').forEach(cb => {
+    const isChecked = state.scope.cuiCategories.includes(cb.value);
+    cb.checked = isChecked;
+    cb.closest('.cui-cb').classList.toggle('ck', isChecked);
+  });
+  // Restore ESP state if resuming
+  if(state.scope.hasESP) {
+    espToggle(state.scope.hasESP);
+  }
+  showScreen('screen-scope-3');
+}
+
+function completeScopeAndBegin() {
+  if(state.scope.cuiCategories.length === 0) {
+    if(!confirm('No CUI categories selected. Continue anyway?')) return;
+  }
+  if(state.scope.hasESP === 'yes') {
+    const unauthorized = state.scope.esps.filter(e=>e.status==='none'||e.status==='');
+    if(unauthorized.length > 0 && !confirm(
+      unauthorized.length + ' ESP(s) may not be FedRAMP/CMMC authorized. Per 32 CFR §170.19(c)(2)(iv), unauthorized ESPs that touch CUI are a compliance risk. Continue anyway?'
+    )) return;
+  }
+  state.scope.completed = true;
+  autosave();
   buildDomainScreens();
   goToDomain(0);
 }
@@ -1680,6 +2029,47 @@ function buildSSPDoc() {
     + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">Assessment Date</div><div style="font-size:13px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;">' + today + '</div></div>'
     + '</div></div>';
 
+  // 2. System Scope & Asset Classification
+  if(state.scope && state.scope.completed) {
+    const infraLabels = {'on-prem':'On-Premises','cloud':'Cloud-Hosted','hybrid':'Hybrid','gfe':'Government-Furnished Equipment'};
+    html += '<div style="margin-bottom:24px;">'
+      + '<h3 style="font-size:13px;font-weight:700;color:#0099CC;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #00C8F0;padding-bottom:6px;margin-bottom:12px;">2. System Scope &amp; Asset Classification</h3>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">'
+      + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">System Name</div><div style="font-size:13px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;">' + (state.scope.sysName||'[Not specified]') + '</div></div>'
+      + '<div><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">Infrastructure</div><div style="font-size:13px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;">' + (infraLabels[state.scope.infra]||state.scope.infra||'[Not specified]') + '</div></div>'
+      + '</div>'
+      + '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:2px;">Boundary Description</div><div style="font-size:12px;color:#0D1B2A;border-left:3px solid #E0F7FD;padding-left:8px;line-height:1.5;">' + (state.scope.boundaryDesc||'[Not specified]') + '</div></div>';
+
+    if(state.scope.assets && state.scope.assets.length > 0) {
+      const catLabels = {'CUI':'CUI Asset','SPA':'Security Protection Asset','CRMA':'Contractor Risk Managed','GFE':'Specialized — GFE','IoT':'Specialized — IoT','OT':'Specialized — OT/ICS','OOS':'Out of Scope'};
+      html += '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:6px;">Table 4 Asset Classification</div>'
+        + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+        + '<tr style="background:#E0F7FD;"><th style="padding:5px 8px;text-align:left;font-weight:700;">Asset / Group</th><th style="padding:5px 8px;text-align:left;font-weight:700;">Category (32 CFR 170 Table 4)</th><th style="padding:5px 8px;text-align:left;font-weight:700;">Notes</th></tr>'
+        + state.scope.assets.map((a,i) => '<tr style="background:' + (i%2===0?'#FAFBFF':'white') + ';"><td style="padding:5px 8px;border-top:1px solid #E2E8F0;">' + (a.name||'[Unnamed]') + '</td><td style="padding:5px 8px;border-top:1px solid #E2E8F0;">' + (catLabels[a.category]||a.category||'—') + '</td><td style="padding:5px 8px;border-top:1px solid #E2E8F0;color:#64748B;">' + (a.notes||'—') + '</td></tr>').join('')
+        + '</table></div>';
+    }
+
+    if(state.scope.cuiCategories && state.scope.cuiCategories.length > 0) {
+      const cuiLabels = {'CTI':'CTI — Controlled Technical Information','EXPT':'Export Controlled (ITAR/EAR)','PII':'Privacy (PII)','INTEL':'Intelligence','PROC':'Procurement / Acquisition','INFRA':'Critical Infrastructure','LEGAL':'Legal / Attorney-Client','OPSEC':'Operations Security'};
+      html += '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:4px;">CUI Categories Present</div><div style="font-size:12px;color:#0D1B2A;">'
+        + state.scope.cuiCategories.map(v=>'<span style="display:inline-block;background:#E0F7FD;border:1px solid #00C8F0;border-radius:4px;padding:2px 7px;margin:2px;font-size:11px;font-weight:600;">' + (cuiLabels[v]||v) + '</span>').join('')
+        + '</div></div>';
+    }
+
+    if(state.scope.hasESP === 'yes' && state.scope.esps && state.scope.esps.length > 0) {
+      const statusLabels = {'fedramp':'FedRAMP Moderate Authorized','cmmc':'CMMC Certified','pending':'Authorization Pending','none':'Not Authorized — Risk'};
+      html += '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;margin-bottom:6px;">External Service Providers (ESP)</div>'
+        + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+        + '<tr style="background:#E0F7FD;"><th style="padding:5px 8px;text-align:left;font-weight:700;">Provider</th><th style="padding:5px 8px;text-align:left;font-weight:700;">Type</th><th style="padding:5px 8px;text-align:left;font-weight:700;">Authorization Status</th></tr>'
+        + state.scope.esps.map((e,i) => '<tr style="background:' + (i%2===0?'#FAFBFF':'white') + ';"><td style="padding:5px 8px;border-top:1px solid #E2E8F0;">' + (e.name||'[Unnamed]') + '</td><td style="padding:5px 8px;border-top:1px solid #E2E8F0;">' + (e.type||'—') + '</td><td style="padding:5px 8px;border-top:1px solid #E2E8F0;color:' + (e.status==='none'?'#DC2626':e.status==='fedramp'||e.status==='cmmc'?'#059669':'#D97706') + ';">' + (statusLabels[e.status]||'Unknown') + '</td></tr>').join('')
+        + '</table></div>';
+    } else if(state.scope.hasESP === 'no') {
+      html += '<div style="font-size:11px;color:#059669;margin-bottom:8px;">✓ No External Service Providers identified.</div>';
+    }
+
+    html += '</div>';
+  }
+
   Object.entries(domains).forEach(([did, domain]) => {
     const domImpl = domain.controls.filter(ct => state.responses[ct.id]?.status === 'implemented').length;
     html += '<div style="margin-bottom:20px;">'
@@ -2220,6 +2610,7 @@ function autosave() {
       company: state.company,
       responses: state.responses,
       currentDomain: state.currentDomain,
+      scope: state.scope,
       savedAt: new Date().toISOString(),
       version: 1
     };
@@ -2268,6 +2659,7 @@ function restoreProgress() {
   state.company = saved.company || {};
   state.responses = saved.responses || {};
   state.currentDomain = saved.currentDomain || 0;
+  state.scope = saved.scope || { sysName:'', infra:'', userCount:'', boundaryDesc:'', assets:[], cuiCategories:[], hasESP:'', esps:[], completed:false };
 
   // Restore company form fields
   const fields = {
@@ -2284,9 +2676,13 @@ function restoreProgress() {
     if (el && val) el.value = val;
   });
 
-  // Go straight to domain screen
-  buildDomainScreens();
-  goToDomain(state.currentDomain || 0);
+  // Route based on scope completion
+  if(state.scope && state.scope.completed) {
+    buildDomainScreens();
+    goToDomain(state.currentDomain || 0);
+  } else {
+    showScopeWizard();
+  }
   showSaveIndicator();
 
   // Hide the resume banner
@@ -2335,9 +2731,14 @@ function uploadProgress() {
         state.company = data.company;
         state.responses = data.responses;
         state.currentDomain = data.currentDomain || 0;
+        state.scope = data.scope || { sysName:'', infra:'', userCount:'', boundaryDesc:'', assets:[], cuiCategories:[], hasESP:'', esps:[], completed:false };
         autosave();
-        buildDomainScreens();
-        goToDomain(state.currentDomain);
+        if(state.scope && state.scope.completed) {
+          buildDomainScreens();
+          goToDomain(state.currentDomain);
+        } else {
+          showScopeWizard();
+        }
         alert('Progress restored! Resuming from where you left off.');
       } catch(err) {
         alert('Could not read progress file. Please try again.');
