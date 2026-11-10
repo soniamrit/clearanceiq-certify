@@ -403,10 +403,10 @@ footer p{font-size:11px;color:#283848;}
       </button>
       <p style="font-size:12px;color:var(--slate);margin-top:10px;">Estimated time: 60–90 minutes · Assessment free · Documents from $999</p>
       <div style="margin-top:12px;">
-        <button onclick="uploadProgress()"
-          style="background:transparent;color:var(--cyan);border:2px solid var(--cyan);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+        <label style="display:inline-block;cursor:pointer;background:transparent;color:var(--cyan);border:2px solid var(--cyan);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;">
           📂 Load Saved Progress
-        </button>
+          <input type="file" accept=".json,application/json" style="display:none;" onchange="handleProgressFile(this)">
+        </label>
       </div>
     </div>
   </div>
@@ -3342,45 +3342,34 @@ function downloadProgress() {
   URL.revokeObjectURL(url);
 }
 
-function uploadProgress() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json,application/json';
-  input.style.cssText = 'position:fixed;top:-9999px;opacity:0;pointer-events:none;';
-  input.onchange = (e) => {
-    if (input.parentNode) document.body.removeChild(input);
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        if (!data.company || !data.responses) {
-          alert('Invalid progress file. Please use a file exported from ClearanceIQ CERTIFY.');
-          return;
-        }
-        state.company = data.company;
-        state.responses = data.responses;
-        state.currentDomain = data.currentDomain || 0;
-        state.scope = data.scope || { sysName:'', infra:'', userCount:'', boundaryDesc:'', assets:[], cuiCategories:[], hasESP:'', esps:[], completed:false };
-        autosave();
-        if(state.scope && state.scope.completed) {
-          buildDomainScreens();
-          goToDomain(state.currentDomain);
-        } else {
-          showScopeWizard();
-        }
-        alert('Progress restored! Resuming from where you left off.');
-      } catch(err) {
-        alert('Could not read progress file. Please try again.');
+function handleProgressFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.company || !data.responses) {
+        alert('Invalid progress file. Please use a file exported from ClearanceIQ CERTIFY.');
+        return;
       }
-    };
-    reader.readAsText(file);
+      state.company = data.company;
+      state.responses = data.responses;
+      state.currentDomain = data.currentDomain || 0;
+      state.scope = data.scope || { sysName:'', infra:'', userCount:'', boundaryDesc:'', assets:[], cuiCategories:[], hasESP:'', esps:[], completed:false };
+      autosave();
+      if(state.scope && state.scope.completed) {
+        buildDomainScreens();
+        goToDomain(state.currentDomain);
+      } else {
+        showScopeWizard();
+      }
+      alert('Progress restored! Resuming from where you left off.');
+    } catch(err) {
+      alert('Could not read progress file. Please try again.');
+    }
   };
-  input.addEventListener('cancel', () => { if (input.parentNode) document.body.removeChild(input); });
-  document.body.appendChild(input);
-  input.click();
-  setTimeout(() => { if (input.parentNode) document.body.removeChild(input); }, 60000);
+  reader.readAsText(file);
 }
 
 // ── SHOW RESUME BANNER ON INTRO SCREEN ────────────────────────────
